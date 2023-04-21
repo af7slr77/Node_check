@@ -20,12 +20,11 @@ def get_nodes_urls(api_url):
 	nodes_data = res['result']['ssnlist']
 	for key in nodes_data:
 		url = nodes_data[f'{key}']['arguments'][5]
-		#name = nodes_data[f'{key}']['arguments'][3]
-		#urls.append({'node_url':url, 'name':name})
-		urls.append(url)
+		name = nodes_data[f'{key}']['arguments'][3]
+		urls.append({'node_url':url, 'name':name})
 	return urls
 
-async def call_url(url):
+async def call_url(url, name):
 	params = json.dumps( {
 		"id": "1",
 		"jsonrpc": "2.0",
@@ -41,25 +40,29 @@ async def call_url(url):
 					resp = await response.json()
 					current_dse_poch = resp['result']['CurrentDSEpoch']
 					current_mini_epoch = resp['result']['CurrentMiniEpoch']
-					return current_dse_poch, current_mini_epoch
+					return {'name':name, 'current_dse_poch':current_dse_poch, 'current_mini_epoch':current_mini_epoch}
 		except Exception as ex:
 			current_dse_poch = 'error'
 			current_mini_epoch = 'error'
-			return current_dse_poch, current_mini_epoch
+			return {'name':name, 'current_dse_poch':current_dse_poch, 'current_mini_epoch':current_mini_epoch}
 
-
-async def main():
+async def get_nodes_info():
 	api_url = 'https://api.zilliqa.com/'
 	urls = get_nodes_urls(api_url)
-	while True:
-		tasks = []
-		for url in urls:
-			tasks.append(asyncio.create_task(call_url(url)))
-			if len(tasks) == len(urls):
-				res = await asyncio.gather(*tasks)
-				print(res)
-				tasks = []
+	# urls = [{'node_url': 'https://ssn.zilpay.io/api', 'name': 'ZilPay'}]
+	# while True:
+	tasks = []
+	for item in urls:
+		node_url = item ['node_url']
+		node_name = item ['name']
+		tasks.append(asyncio.create_task(call_url(node_url, node_name)))
+		if len(tasks) == len(urls):
+			result = await asyncio.gather(*tasks)
+			tasks = []
+			return result
 
-if __name__ == '__main__':
-	loop = asyncio.get_event_loop()
-	loop.run_until_complete(main())
+
+
+# if __name__ == '__main__':
+# 	loop = asyncio.get_event_loop()
+# 	loop.run_until_complete(main())
