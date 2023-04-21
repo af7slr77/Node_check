@@ -9,24 +9,22 @@ dp = Dispatcher(bot)
 messages_id_data = [] # store messages id
 
 
-@dp.message_handler(commands=['start'])
+@dp.message_handler()
 async def start(message: types.Message):
 	user_id = message.from_user.id
-	if user_id in user_id_data:
-		print("this user is already logged in")
-	else:
-		user_id_data.append(user_id)
-		
+	while True:
+		await check_nodes(user_id)
+		# await clear_chat() 
 	
 
 
-async def check_nodes():
+async def check_nodes(user_id):
 	responce = await get_nodes_info()
 	print(responce)
 	for i in responce:
 		if i['current_dse_poch'] == 'error' or i['current_mini_epoch'] == 'error':
 			msg = i['name'] + ' ' + 'something went wrong, check the node!'
-			send_message = await bot.send_message(chat_id, msg)
+			send_message = await bot.send_message(user_id, msg)
 			message_id = send_message['message_id']
 			messages_id_data.append(message_id)
 
@@ -40,15 +38,15 @@ async def clear_chat(): # Deletes all messages from the chat except the last 6
 
 
 
-async def main():
+# async def main():
 
-	while True:
-		await check_nodes()
-		await clear_chat() 
-		# await asyncio.sleep(225)
+# 	while True:
+# 		await check_nodes()
+# 		await clear_chat() 
+# 		# await asyncio.sleep(225)
 
 
 if __name__ == '__main__':
 	loop = asyncio.get_event_loop()
-	loop.create_task(main())
+	loop.create_task(get_nodes_info())
 	executor.start_polling(dp)
