@@ -6,10 +6,38 @@ from main import get_nodes_info
 bot = Bot(token=token_bot)
 dp = Dispatcher(bot)
 
-messages_id_data = [] # store messages id
+messages_id_data = []
+comands_name_data = [
+	'zilliqa',
+	'rockx',
+	'ezil.me',
+	'wave',
+	'shardpool.io',
+	'valkyrie2',
+	'huobi staking',
+	'zilliqa2',
+	'moonlet.io',
+	'bountyblok',
+	'everstake.one',
+	'nodamatics.com',
+	'zilpay',
+	'avely finance',
+	'viewblock',
+	'atomicwallet',
+	'binance staking',
+	'luganodes',
+	'cex.io',
+	'blox-sdk staking',
+	'valkyrie investments',
+	'ignite dao',
+	'zillet',
+	'staked',
+	'kucoin',
+	'hashquark',
+	'stakin']
 
 
-@dp.message_handler(commands=['start'])
+@dp.message_handler()
 async def start(message: types.Message):
 	user_id = message.from_user.id
 	node_for_tracking = message.text
@@ -19,17 +47,23 @@ async def start(message: types.Message):
 	
 
 
+
+
 async def check_nodes(user_id, node_for_tracking):
 	responce = await get_nodes_info()
-	print(responce)
 	for i in responce:
-		if i['name'] == node_for_tracking:
-			print(node_for_tracking)
+		if i['name'].lower() == node_for_tracking.lower():
 			if i['current_dse_poch'] == 'error' or i['current_mini_epoch'] == 'error':
 				msg = i['name'] + ' ' + 'something went wrong, check the node!'
 				send_message = await bot.send_message(user_id, msg)
 				message_id = send_message['message_id']
 				messages_id_data.append(message_id)
+			else:
+				msg = i['current_dse_poch'] + ' ' + i['current_mini_epoch']
+				await bot.send_message(user_id, msg)
+	# else:
+	# 	msg = 'Node does not exist! Please try again'
+	# 		await bot.send_message(user_id, msg)
 
 
 
