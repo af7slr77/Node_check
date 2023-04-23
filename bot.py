@@ -1,5 +1,5 @@
 import asyncio
-from config import token_bot, chat_id
+from config import token_bot
 from aiogram import Bot, Dispatcher, executor, types
 from keyboard import kb
 from main import get_nodes_info
