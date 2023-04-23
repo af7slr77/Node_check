@@ -2,7 +2,6 @@ import requests
 import asyncio
 import aiohttp
 import json
-from models import write_to_db
 
 
 
@@ -40,11 +39,11 @@ async def call_url(url, name):
 					resp = await response.json()
 					current_dse_poch = resp['result']['CurrentDSEpoch']
 					current_mini_epoch = resp['result']['CurrentMiniEpoch']
-					return {'name':name, 'current_dse_poch':current_dse_poch, 'current_mini_epoch':current_mini_epoch}
+					return {'name':name.lower(), 'current_dse_poch':current_dse_poch, 'current_mini_epoch':current_mini_epoch}
 		except Exception as ex:
 			current_dse_poch = 'error'
 			current_mini_epoch = 'error'
-			return {'name':name, 'current_dse_poch':current_dse_poch, 'current_mini_epoch':current_mini_epoch}
+			return {'name':name.lower(), 'current_dse_poch':current_dse_poch, 'current_mini_epoch':current_mini_epoch}
 
 async def get_nodes_info():
 	api_url = 'https://api.zilliqa.com/'
