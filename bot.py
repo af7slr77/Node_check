@@ -11,7 +11,7 @@ dp = Dispatcher(bot)
 @dp.message_handler(commands=["help"])
 async def help_comand(message: types.Message):
 	msg = """
-	Сhoose the notes to track:
+	Сhoose the nodes to track:
 	<b>zilliqa '</b>
 	<b>rockx </b>S
 	<b>ezil.me</b>
