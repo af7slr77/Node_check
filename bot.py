@@ -106,6 +106,41 @@ async def track_node(user_id, node_for_tracking):
 					update_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 					await write_to_db(node_url, name, current_dse_poch, current_mini_epoch, uptime, downtime, update_time)
 
+
+async def track_nodes():
+	while True:
+		responce = await get_nodes_info()
+
+		for i in responce:
+			node_url = i['node_url']
+			name = i['name']
+			current_dse_poch = i['current_dse_poch']
+			current_mini_epoch = i['current_mini_epoch']
+			all_records_from_db = await get_all_recors() # I get all the records from the database
+			if await if_url_in_db(node_url, all_records_from_db):
+				if current_dse_poch == 'error' or current_mini_epoch == 'error':
+					uptime = False
+					downtime = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+					update_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+					await update(node_url, current_dse_poch, current_mini_epoch, uptime, downtime, update_time)
+				else:
+					uptime = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+					downtime = False
+					update_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+					await update(node_url, current_dse_poch, current_mini_epoch, uptime, downtime, update_time)
+			else:
+				if current_dse_poch == 'error' or current_mini_epoch == 'error':
+					uptime = False
+					downtime = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+					update_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+					await write_to_db(node_url, name, current_dse_poch, current_mini_epoch, uptime, downtime, update_time)
+				else:
+					uptime = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+					downtime = False
+					update_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+					await write_to_db(node_url, name, current_dse_poch, current_mini_epoch, uptime, downtime, update_time)
+
 if __name__ == '__main__':
-	# loop = asyncio.get_event_loop(check_nodes())
+	loop = asyncio.get_event_loop()
+	loop.create_task(track_nodes())
 	executor.start_polling(dp, skip_updates=True)
