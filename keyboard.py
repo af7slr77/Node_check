@@ -30,4 +30,4 @@ kb.add(KeyboardButton('staked'))
 kb.add(KeyboardButton('kucoin'))
 kb.add(KeyboardButton('hashquark'))
 kb.add(KeyboardButton('stakin'))
-
+kb.add(KeyboardButton('/stop'))
