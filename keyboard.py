@@ -2,6 +2,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemo
 
 
 kb = ReplyKeyboardMarkup(resize_keyboard=True)
+kb.add(KeyboardButton('/start'))
 kb.add(KeyboardButton('/help'))
 kb.add(KeyboardButton('zilliqa'))
 kb.add(KeyboardButton('rockx'))

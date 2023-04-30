@@ -4,7 +4,7 @@ import aiohttp
 import json
 
 
-def get_nodes_urls(api_url):
+async def get_nodes_urls(api_url):
 	params = json.dumps( {
 		"id": "1",
 		"jsonrpc": "2.0",
@@ -21,6 +21,7 @@ def get_nodes_urls(api_url):
 		name = nodes_data[f'{key}']['arguments'][3]
 		urls.append({'node_url':url, 'name':name})
 	return urls
+
 
 async def call_url(node_url, name):
 	params = json.dumps( {
@@ -43,6 +44,7 @@ async def call_url(node_url, name):
 			current_dse_poch = 'error'
 			current_mini_epoch = 'error'
 			return {'node_url':node_url ,'name':name.lower(), 'current_dse_poch':current_dse_poch, 'current_mini_epoch':current_mini_epoch}
+
 
 async def get_nodes_info():
 	api_url = 'https://api.zilliqa.com/'
