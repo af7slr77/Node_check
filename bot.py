@@ -1,7 +1,7 @@
 import asyncio
 from config import token_bot
 from aiogram import Bot, Dispatcher, executor, types
-from keyboard import kb
+from keyboard import kb, node_track_kb
 from main import get_nodes_info
 from datetime import datetime
 from models import db, nodes,connection, write_to_db, get_all_recors, update, get_recording_from_database
@@ -10,6 +10,12 @@ from models import db, nodes,connection, write_to_db, get_all_recors, update, ge
 bot = Bot(token=token_bot)
 dp = Dispatcher(bot)
 
+commands=[
+	'zilliqa', 'rockx', 'ezil.me', 'wave', 'shardpool.io', 'valkyrie2', 'huobi staking', 'zilliqa2',
+	'moonlet.io', 'bountyblok', 'everstake.one', 'nodamatics.com', 'zilpay', 'avely finance', 'viewblock',
+	'atomicwallet', 'binance staking', 'luganodes', 'cex.io', 'blox-sdk staking', 'valkyrie investments',
+	'ignite dao', 'zillet', 'staked', 'kucoin', 'hashquark', 'stakin'
+	]
 
 @dp.message_handler(commands=["start"])
 async def start(message: types.Message):
@@ -50,8 +56,43 @@ async def help_comand(message: types.Message):
 	<b>hashquark</b>
 	<b>stakin</b>
 		"""
-	
 	await bot.send_message(chat_id = message.from_user.id, text=msg, parse_mode='HTML', reply_markup=kb)
+
+
+@dp.message_handler(commands=[*commands])
+async def show_nod_stat(message: types.Message):
+	user_id = message.from_user.id
+	msg = 'get from db info about this node'
+	await bot.send_message(user_id, msg, reply_markup=node_track_kb)
+
+
+@dp.message_handler(commands=['track', 'stop'])
+async def track_node(message: types.Message):
+	user_id = message.from_user.id
+	print(message.text)
+	while True:
+		if message.text == '/stop':
+			break
+		elif message.text == '/track':
+			msg = 'get from db info about this node'
+			await bot.send_message(user_id, msg, reply_markup=node_track_kb)
+
+# stop_flag = False  # инициализация флага
+
+# for i in range(12):
+#     if stop_flag:  # проверка на флаг
+#         break  # если флаг установлен, выходим из цикла
+#     await asyncio.sleep(5)
+#     await bot.send_message(callback_query.from_user.id,
+#                             f"Напоминание:\nУ вас есть скидка {db.get_sale(callback_query.from_user.id)}% на первую покупку по промокоду {db.get_promocode(callback_query.from_user.id)} на {db.get_style(callback_query.from_user.id)} набор\n\nУ вас есть скидка 15% на первое продление по {db.get_promocode(callback_query.from_user.id)} промокуду", reply_markup=keybards.TrueMenu)
+    
+# # хэндлер на кнопку "Уже купил"
+# @dp.callback_query_handler(text='TrueMenu_2')
+# async def handle_true_menu_2(callback_query: CallbackQuery):
+#     global stop_flag  # обращаемся к глобальной переменной
+#     stop_flag = True  # устанавливаем флаг
+#     await bot.send_message(callback_query.from_user.id, "Остановка цикла...")
+
 
 # @dp.message_handler()
 # async def start(message: types.Message):
@@ -74,10 +115,12 @@ async def if_url_in_db(node_url, all_records_from_db):
 		if node_url in elem:
 			return True
 	return False
-	
-async def track_node(user_id, node_for_tracking):
-	responce = await get_nodes_info()
 
+
+
+	
+async def test(user_id, node_for_tracking):
+	responce = await get_nodes_info()
 	for i in responce:
 		node_url = i['node_url']
 		name = i['name']
@@ -118,7 +161,10 @@ async def track_node(user_id, node_for_tracking):
 					await write_to_db(node_url, name, current_dse_poch, current_mini_epoch, uptime, downtime, update_time)
 
 
-async def track_nodes():
+async def responce_processing():
+	'''
+	This function processes the response from the api and  calls "write_to_db" to write to db.
+	'''
 	while True:
 		responce = await get_nodes_info()
 		for i in responce:
@@ -164,5 +210,5 @@ async def track_nodes():
 
 if __name__ == '__main__':
 	loop = asyncio.get_event_loop()
-	loop.create_task(track_nodes())
+	loop.create_task(responce_processing())
 	executor.start_polling(dp, skip_updates=True)
