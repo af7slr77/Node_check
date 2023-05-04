@@ -4,13 +4,15 @@ from commands.bot_commands import bot_commands
 
 
 async def help_comand(message: types.Message, command: CommandObject):
-	print(command.args)
 	if command.args:
 		for cmd in bot_commands:
-			print(cmd[0] == command.args)
 			if cmd[0] == command.args:
-				return await message.answer(text='')
+				return await message.answer(f"{cmd[0]} - {cmd[1]}")
 		else:
 			return await message.answer(text='Comand not found')
 	else:
-		return await message.answer('for help use /help')
+		return await help_func(message)
+
+
+async def help_func(message:types.Message):
+	return await message.answer('For help use /help <command>')
