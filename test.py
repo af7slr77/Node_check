@@ -24,4 +24,4 @@ async def cancel(message: types.Message,  state=FSMContext):
     if current_state is None:
         return
     await state.finish()
-    await message.answer('Вы ввели команду /cancel')
+    await message.answer('Вы ввели команду /cancel'

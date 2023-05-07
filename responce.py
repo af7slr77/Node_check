@@ -2,7 +2,8 @@ import requests
 import asyncio
 import aiohttp
 import json
-
+from datetime import datetime
+from models import db, nodes,connection, write_to_db, get_all_recors, update, get_recording_from_database
 
 async def get_nodes_urls(api_url):
 	params = json.dumps( {
@@ -29,7 +30,7 @@ async def call_url(node_url, name):
 		"jsonrpc": "2.0",
 		"method": "GetBlockchainInfo",
 		"params": [""]
-	} )
+		} )
 	headers = {"Content-Type": "application/json"}
 
 	async with aiohttp.ClientSession(trust_env=True) as session:
@@ -58,3 +59,72 @@ async def get_nodes_info():
 			result = await asyncio.gather(*tasks)
 			tasks = []
 			return result
+
+
+async def if_url_in_db(node_url, all_records_from_db):
+	"""
+	This function checks whether this node_url is in the database
+	"""
+	for elem in all_records_from_db:
+		if node_url in elem:
+			return True
+	return False
+
+
+async def responce_processing():
+	'''
+	This function processes the response from the api and  calls "write_to_db" to write to db.
+	'''
+	responce = await get_nodes_info()
+	print(responce)
+	for i in responce:
+		node_url = i['node_url']
+		name = i['name']
+		current_dse_poch = i['current_dse_poch']
+		current_mini_epoch = i['current_mini_epoch']
+		all_records_from_db = await get_all_recors() # I get all the records from the database
+		if await if_url_in_db(node_url, all_records_from_db):
+			if current_dse_poch == 'error' or current_mini_epoch == 'error':
+				update_time = datetime.now().timestamp()
+				recording_from_db = await get_recording_from_database(node_url)
+				last_update_time = float(recording_from_db[-1])
+				uptime = False
+				last_downtime = float(recording_from_db[-2])
+				downtime = update_time - last_update_time + last_downtime
+				await update(node_url, current_dse_poch, current_mini_epoch, uptime, downtime, update_time)
+			else:
+						
+				recording_from_db = await get_recording_from_database(node_url)
+				last_update_time = float(recording_from_db[-1])
+				downtime = False
+				update_time = datetime.now().timestamp()
+				last_uptime = float(recording_from_db[-3])
+				uptime = update_time - last_update_time + last_uptime
+				await update(node_url, current_dse_poch, current_mini_epoch, uptime, downtime, update_time)
+		else:
+			if current_dse_poch == 'error' or current_mini_epoch == 'error':
+				last_upate_time = 0
+				uptime = False
+				downtime = 0
+				last_downtime = 0
+				update_time = datetime.now().timestamp()
+				await write_to_db(node_url, name, current_dse_poch, current_mini_epoch, uptime, downtime, update_time)
+			else:
+				last_upate_time = 0
+				downtime = False
+				update_time = datetime.now().timestamp()
+				uptime = 0
+				last_uptime = 0
+				await write_to_db(node_url, name, current_dse_poch, current_mini_epoch, uptime, downtime, update_time)
+
+
+async def main():
+	while True:
+		await responce_processing()
+
+
+if __name__ == '__main__':
+	# loop = asyncio.get_event_loop()
+	# loop.create_task(main())
+	asyncio.run(main())
+		# print(asyncio.run(get_nodes_info()))

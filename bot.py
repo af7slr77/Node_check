@@ -2,9 +2,7 @@ import asyncio
 from config import token_bot
 from aiogram import Bot, Dispatcher, executor, types
 from keyboard import kb, node_track_kb
-from main import get_nodes_info
-from datetime import datetime
-from models import db, nodes,connection, write_to_db, get_all_recors, update, get_recording_from_database
+
 
 
 bot = Bot(token=token_bot)
@@ -91,7 +89,7 @@ async def track_node(message: types.Message):
 # async def handle_true_menu_2(callback_query: CallbackQuery):
 #     global stop_flag  # обращаемся к глобальной переменной
 #     stop_flag = True  # устанавливаем флаг
-#     await bot.send_message(callback_query.from_user.id, "Остановка цикла...")
+#     await bot.send_message(callback_query.from_user.id, "Остановка цикла...")ё
 
 
 # @dp.message_handler()
@@ -107,14 +105,7 @@ async def track_node(message: types.Message):
 	# 	await check_nodes(user_id, node_for_tracking)
 	# node_for_tracking = ''
 
-async def if_url_in_db(node_url, all_records_from_db):
-	"""
-	This function checks whether this node_url is in the database
-	"""
-	for elem in all_records_from_db:
-		if node_url in elem:
-			return True
-	return False
+
 
 
 
@@ -161,51 +152,7 @@ async def test(user_id, node_for_tracking):
 					await write_to_db(node_url, name, current_dse_poch, current_mini_epoch, uptime, downtime, update_time)
 
 
-async def responce_processing():
-	'''
-	This function processes the response from the api and  calls "write_to_db" to write to db.
-	'''
-	while True:
-		responce = await get_nodes_info()
-		for i in responce:
-			node_url = i['node_url']
-			name = i['name']
-			current_dse_poch = i['current_dse_poch']
-			current_mini_epoch = i['current_mini_epoch']
-			all_records_from_db = await get_all_recors() # I get all the records from the database
-			if await if_url_in_db(node_url, all_records_from_db):
-				if current_dse_poch == 'error' or current_mini_epoch == 'error':
-					update_time = datetime.now().timestamp()
-					recording_from_db = await get_recording_from_database(node_url)
-					last_update_time = float(recording_from_db[-1])
-					uptime = False
-					last_downtime = float(recording_from_db[-2])
-					downtime = update_time - last_update_time + last_downtime
-					await update(node_url, current_dse_poch, current_mini_epoch, uptime, downtime, update_time)
-				else:
-					
-					recording_from_db = await get_recording_from_database(node_url)
-					last_update_time = float(recording_from_db[-1])
-					downtime = False
-					update_time = datetime.now().timestamp()
-					last_uptime = float(recording_from_db[-3])
-					uptime = update_time - last_update_time + last_uptime
-					await update(node_url, current_dse_poch, current_mini_epoch, uptime, downtime, update_time)
-			else:
-				if current_dse_poch == 'error' or current_mini_epoch == 'error':
-					last_upate_time = 0
-					uptime = False
-					downtime = 0
-					last_downtime = 0
-					update_time = datetime.now().timestamp()
-					await write_to_db(node_url, name, current_dse_poch, current_mini_epoch, uptime, downtime, update_time)
-				else:
-					last_upate_time = 0
-					downtime = False
-					update_time = datetime.now().timestamp()
-					uptime = 0
-					last_uptime = 0
-					await write_to_db(node_url, name, current_dse_poch, current_mini_epoch, uptime, downtime, update_time)
+
 
 
 if __name__ == '__main__':
