@@ -5,7 +5,7 @@ from aiogram.filters.command import Command
 from commands.bot_commands import bot_commands
 from commands.start import start
 from commands.help import help_comand, help_func
-from commands.nodes_list import get_nodes_list
+from commands.nodes_buttons import get_nodes_list
 from aiogram import F
 
 
