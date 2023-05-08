@@ -14,5 +14,5 @@ def register_user_comands(router: Router):
     #router.message.register(start, Command(commands=['start'])) - another variant
     router.message.register(start, CommandStart())
     router.message.register(help_comand, Command(commands=['help']))
-    router.message.register(help_func, F.text== 'help')
+    router.message.register(help_func, F.text == 'help')
     router.message.register(get_nodes_list, Command(commands=['get_nodes']))

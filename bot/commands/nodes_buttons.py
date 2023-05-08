@@ -1,17 +1,14 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, ReplyKeyboardMarkup, KeyboardButton
 from aiogram import types
-from models import nodes, get_all_records, get_recording_from_database, write_to_db
 
 
-# buttons=[
-#  	'zilliqa', 'rockx', 'ezil.me', 'wave', 'shardpool.io', 'valkyrie2', 'huobi staking', 'zilliqa2',
-#  	'moonlet.io', 'bountyblok', 'everstake.one', 'nodamatics.com', 'zilpay', 'avely finance', 'viewblock',
-#  	'atomicwallet', 'binance staking', 'luganodes', 'cex.io', 'blox-sdk staking', 'valkyrie investments',
-#  	'ignite dao', 'zillet', 'staked', 'kucoin', 'hashquark', 'stakin'
-#  	]
-buttons = get_all_records()
-print(buttons)
+buttons=[
+ 	'zilliqa', 'rockx', 'ezil.me', 'wave', 'shardpool.io', 'valkyrie2', 'huobi staking', 'zilliqa2',
+ 	'moonlet.io', 'bountyblok', 'everstake.one', 'nodamatics.com', 'zilpay', 'avely finance', 'viewblock',
+ 	'atomicwallet', 'binance staking', 'luganodes', 'cex.io', 'blox-sdk staking', 'valkyrie investments',
+ 	'ignite dao', 'zillet', 'staked', 'kucoin', 'hashquark', 'stakin'
+ 	]
 
 async def get_nodes_list(message:types.Message):
 	res = [buttons[i:i+2] for i in range(0, len(buttons), 2)]
