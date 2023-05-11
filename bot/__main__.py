@@ -23,7 +23,7 @@ async def main():
     register_user_comands(dp)
     
 
-    async_engine = create_async_engine("sqlite:///db.new_db")
+    async_engine = create_async_engine('sqlite+aiosqlite:///database.db')
     session_maker = get_session_maker(async_engine)
     await proseed_schemas(async_engine, BaseModel.metadata)
 
