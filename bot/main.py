@@ -6,7 +6,7 @@ from commands import register_user_comands
 from commands.bot_commands import bot_commands
 from aiogram.types import BotCommand
 from db import BaseModel, get_session_maker, create_async_engine, proseed_schemas
-
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 
 async def main():
     logging.basicConfig(level=logging.DEBUG)
@@ -27,7 +27,7 @@ async def main():
     session_maker = get_session_maker(async_engine)
     await proseed_schemas(async_engine, BaseModel.metadata)
 
-    await dp.start_polling(bot)
+    await dp.start_polling(bot, session_maker=session_maker)
 
 if __name__ == '__main__':
     try:
