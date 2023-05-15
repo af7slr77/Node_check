@@ -1,5 +1,5 @@
 
-from bot import MAX_NODE_TIMEOUT_SECOND, MAIN_NODE
+from ..config import MAX_NODE_TIMEOUT_SECOND, MAIN_NODE
 
 
 async def get_nodes_urls():
@@ -23,4 +23,4 @@ async def get_nodes_urls():
 	return urls
 
 if __name__ == '__main__':
-	asyncio.run(get_nodes_info())
+	asyncio.run(get_nodes_urls)
