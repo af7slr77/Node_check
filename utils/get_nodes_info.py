@@ -1,8 +1,9 @@
 import asyncio
-
+from get_nodes_urls import get_nodes_urls
+from call_url import call_url
 
 async def get_nodes_info(urls):
-	tasks = []
+	tasks = [] 
 	for item in urls:
 		node_url = item['node_url']
 		node_name = item['name']
@@ -10,8 +11,9 @@ async def get_nodes_info(urls):
 		if len(tasks) == len(urls):
 			result = await asyncio.gather(*tasks)
 			tasks = []
-			#return result  
+			return result
 
 
 if __name__ == '__main__':
-	asyncio.run(get_nodes_info())
+	urls = asyncio.run(get_nodes_urls())
+	asyncio.run(get_nodes_info(urls))

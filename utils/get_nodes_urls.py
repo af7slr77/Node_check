@@ -1,9 +1,10 @@
-
-from ..config import MAX_NODE_TIMEOUT_SECOND, MAIN_NODE
+import asyncio
+import requests
+import json
+from zilliqa import MAX_NODE_TIMEOUT_SECOND, MAIN_NODE
 
 
 async def get_nodes_urls():
-	MAIN_NODE
 	params = json.dumps( {
 		"id": "1",
 		"jsonrpc": "2.0",
@@ -12,15 +13,16 @@ async def get_nodes_urls():
 	} )
 	headers = {"Content-Type": "application/json"}
 
-	res = requests.post(api_url, data=params, headers=headers, timeout = MAX_NODE_TIMEOUT_SECOND).json()
+	result = requests.post(MAIN_NODE, data=params, headers=headers, timeout = MAX_NODE_TIMEOUT_SECOND).json()
 	urls = []
-	nodes_data = res['result']['ssnlist']
+	nodes_data = result['result']['ssnlist']
 	for key in nodes_data:
-		url = nodes_data[f'{key}']['arguments'][5]
-		name = nodes_data[f'{key}']['arguments'][3]
+		url = nodes_data[key]['arguments'][5]
+		name = nodes_data[key]['arguments'][3]
 		urls.append({'node_url':url, 'name':name})
-		print(urls)
+	
 	return urls
 
 if __name__ == '__main__':
-	asyncio.run(get_nodes_urls)
+	# get_nodes_urls()
+	asyncio.run(get_nodes_urls())

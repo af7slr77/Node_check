@@ -1,4 +1,9 @@
 import asyncio
+import aiohttp
+import requests
+import json
+from zilliqa import MAX_NODE_TIMEOUT_SECOND
+
 async def call_url(node_url, name):
 	params = json.dumps( {
 		"id": "1",
@@ -11,9 +16,9 @@ async def call_url(node_url, name):
 	async with aiohttp.ClientSession(trust_env=True) as session:
 		try:
 			async with session.post(node_url, data=params, headers=headers,) as response:
-				async with session.post(node_url, data=params, headers=headers, timeout=2) as response:
+				async with session.post(node_url, data=params, headers=headers, timeout=MAX_NODE_TIMEOUT_SECOND) as response:
 					resp = await response.json()
-					current_dse_poch = resp['result']['CurrentDSEpoch']
+					current_ds_epoch = resp['result']['CurrentDSEpoch']
 					current_mini_epoch = resp['result']['CurrentMiniEpoch']
 					return {
 						'node_url':node_url , 
@@ -22,7 +27,7 @@ async def call_url(node_url, name):
 						'current_mini_epoch': current_mini_epoch
 					}
 		except Exception as ex:
-			current_dse_poch = None
+			current_ds_epoch = None
 			current_mini_epoch = None
 			return {
 				'node_url': node_url ,
@@ -33,4 +38,4 @@ async def call_url(node_url, name):
 
 
 if __name__ == '__main__':
-	asyncio.run(get_nodes_info())
+	asyncio.run(call_url('https://stakingseed-api.seed.zilliqa.com', 'zilliqa'))
