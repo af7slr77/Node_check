@@ -1,7 +1,9 @@
-from ..config import MAX_NODE_TIMEOUT_SECOND, MAIN_NODE
+
+from bot import MAX_NODE_TIMEOUT_SECOND, MAIN_NODE
 
 
 async def get_nodes_urls():
+	MAIN_NODE
 	params = json.dumps( {
 		"id": "1",
 		"jsonrpc": "2.0",
