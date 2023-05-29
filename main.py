@@ -6,7 +6,7 @@ from commands import register_user_comands
 from commands.bot_commands import bot_commands
 from aiogram.types import BotCommand
 from db import get_session_maker, create_async_engine
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
+# from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 
 async def main():
     logging.basicConfig(level=logging.DEBUG)

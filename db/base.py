@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKey,VARCHAR, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from utils.get_nodes_urls import get_nodes_urls
+from lib.get_nodes_urls import get_nodes_urls
 
 BaseModel = declarative_base()
 
