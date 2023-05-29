@@ -1,4 +1,7 @@
 import asyncio
+from lib.get_nodes_info import get_nodes_info
+from lib.get_nodes_urls import get_nodes_urls
+
 
 
 class Worker():
@@ -15,9 +18,7 @@ class Worker():
 			print('run worker job error: ',  ex)
 	
 	async def _fetch_nodes(self):
-		from utils import get_nodes_info, get_nodes_urls
-
-		urls = await get_nodes_urls()
+		urls = get_nodes_urls()
 		nodes_info = await get_nodes_info(urls)
 		return nodes_info
 
