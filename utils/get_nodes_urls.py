@@ -1,10 +1,9 @@
-import asyncio
 import requests
 import json
-from zilliqa import MAX_NODE_TIMEOUT_SECOND, MAIN_NODE
+from config.zilliqa import *
 
 
-async def get_nodes_urls():
+def get_nodes_urls():
 	params = json.dumps( {
 		"id": "1",
 		"jsonrpc": "2.0",
@@ -24,5 +23,4 @@ async def get_nodes_urls():
 	return urls
 
 if __name__ == '__main__':
-	# get_nodes_urls()
-	asyncio.run(get_nodes_urls())
+	get_nodes_urls()

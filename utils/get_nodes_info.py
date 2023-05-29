@@ -1,6 +1,5 @@
 import asyncio
-from get_nodes_urls import get_nodes_urls
-from call_url import call_url
+from .call_url import call_url
 
 async def get_nodes_info(urls):
 	tasks = [] 
@@ -15,5 +14,7 @@ async def get_nodes_info(urls):
 
 
 if __name__ == '__main__':
+	from .get_nodes_urls import get_nodes_urls
+	
 	urls = asyncio.run(get_nodes_urls())
 	asyncio.run(get_nodes_info(urls))

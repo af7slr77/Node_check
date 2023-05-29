@@ -1,1 +1,1 @@
-from .zilliqa import *
+from config.zilliqa import *

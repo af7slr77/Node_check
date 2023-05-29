@@ -5,7 +5,7 @@ import os
 from commands import register_user_comands
 from commands.bot_commands import bot_commands
 from aiogram.types import BotCommand
-from db import BaseModel, get_session_maker, create_async_engine, UsersNodes
+from db import get_session_maker, create_async_engine
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 
 async def main():
@@ -25,6 +25,7 @@ async def main():
 
     async_engine = create_async_engine('sqlite+aiosqlite:///database.db')
     session_maker = get_session_maker(async_engine)
+    
     
 
     await dp.start_polling(bot, session_maker=session_maker)
