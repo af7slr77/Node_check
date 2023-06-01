@@ -13,18 +13,16 @@ class UsersNodes(BaseModel):
 
 	user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True, nullable=False)
 	node_id = Column(Integer,
-		ForeignKey('nodes.nodes_id'), primary_key=True, nullable=False
+		ForeignKey('nodes.node_id'), primary_key=True, nullable=False
 	)
 
 
 class Node(BaseModel):
 	__tablename__ = 'nodes'
 
-	nodes_id = Column(Integer, unique=True,  primary_key=True, nullable=False)
+	node_id = Column(Integer, unique=True,  primary_key=True, nullable=False)
 	node_url = Column(String, unique=True, nullable=False)
 	node_name = Column(String, nullable=False)
-	# score = Column(Integer, nullable=False)
-	# update_time = Column(Integer, nullable=False)
 
 	users = relationship('User', secondary='users_nodes', back_populates='nodes')
 	records = relationship('Records')
@@ -46,4 +44,7 @@ class Records(BaseModel):
 	id = Column(Integer, unique=True,  primary_key=True)
 	score = Column(Integer)
 	update_time = Column(Integer, nullable=False)
-	nodes_id = Column(Integer, ForeignKey('nodes.nodes_id'))
+	node_id = Column(Integer, ForeignKey('nodes.node_id'))
+	current_ds_epoch = Column(Integer)
+	current_mini_epoch = Column(Integer)
+	response_time = Column(Integer)
