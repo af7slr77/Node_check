@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.base import Node, Records
 from datetime import datetime
 from sqlalchemy import select
+from sqlalchemy.orm import lazyload, joinedload
 
 class Worker():
 	interval = 10000
@@ -39,11 +40,33 @@ class Worker():
 
 	async def _update_db(self, nodes_info):
 		async with self._async_session() as session:
+			# print(nodes_info)
 			for node in nodes_info:
+				
+				# print(node['node_name'])
 				if await session.execute(select(Node).filter_by(node_name = node['node_name'])):
-					print(True)
 					try:
+						new_record = Records(
+							score = 'score',
+							update_time = datetime.utcnow().timestamp(),
+							current_ds_epoch = node['current_ds_epoch'],
+							current_mini_epoch = node['current_mini_epoch'],
+							response_time = node['response_time']
+						)
+						node = await session.execute(select(Node).filter_by(node_name = node['node_name']).options(joinedload(Node.records)))
+						node = node.first()[0]
+						print(node)
+						node.records.append(new_record)
+						session.add(new_record)
+						await session.commit()
+					except Exception as ex:
+						print('_update_db, exept1', ex)
+				else:
+					try:
+						print(node['node_name'])
 						new_node = Node(
+							node_url = node['node_url'],
+							node_name = node['node_name'],
 						)
 						new_record = Records(
 							score = 'score',
@@ -52,44 +75,19 @@ class Worker():
 							current_mini_epoch = node['current_mini_epoch'],
 							response_time = node['response_time']
 						)
-						node = await session.execute(select(Node).filter_by(node_name = node['node_name']))
-						# session.execute(new_record)
-						node.records.append(new_record)
-						# session.add(new_node)
+						new_node.records.append(new_record)
+						session.add(new_node)
 						session.add(new_record)
 						await session.commit()
 					except Exception as ex:
-						print(ex)
-				try:
-					new_node = Node(
-						node_url = node['node_url'],
-						node_name = node['name'],
-					)
-					new_record = Records(
-						score = 'score',
-						update_time = datetime.utcnow().timestamp(),
-						current_ds_epoch = node['current_ds_epoch'],
-						current_mini_epoch = node['current_mini_epoch'],
-						response_time = node['response_time']
-					)
-					new_node.records.append(new_record)
-					session.add(new_node)
-					session.add(new_record)
-					await session.commit()
-				except Exception as ex:
-					print(ex)
+						print('_update_db, exept2',  ex)
 
 				
-		
-		# session.add(new_node)
-		# session.commit()
-
-		
-
 if __name__ == '__main__':
 	engine = create_async_engine('sqlite+aiosqlite:///database.db')
 	async_session = async_sessionmaker(engine)
 	# asyncio.run(write())
 	job = Worker(async_session)
+	
 	
 	asyncio.run(job.run())
