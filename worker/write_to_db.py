@@ -19,6 +19,7 @@ class Worker():
 	async def run(self):
 		try:
 			nodes_info = await self._fetch_nodes()
+			# print(nodes_info)
 			await self._update_db(nodes_info)
 			# await self._get_all_records_db()
 			
@@ -38,28 +39,48 @@ class Worker():
 			# for i in all_nodes:
 			# 	print(i[0].nodes_id)
 
+	async def _check_new_blocks(self, node_from_db, node_from_responce):
+			# try:s
+				last_block_record = node_from_db.records[-1]
+				# for record in last_block_records:
+				db_current_ds_epoch = last_block_record.current_ds_epoch
+				db_current_mini_epoch = last_block_record.current_mini_epoch
+				if db_current_mini_epoch == node_from_responce['current_mini_epoch']:
+					print(db_current_mini_epoch, node_from_responce['current_mini_epoch'], db_current_mini_epoch == node_from_responce['current_mini_epoch'])
+					return True
+				else:
+					print(db_current_mini_epoch, node_from_responce['current_mini_epoch'], db_current_mini_epoch == node_from_responce['current_mini_epoch'])
+					return False
+			# except Exception as ex:
+			# 	print('test check blocks', ex,)
+
 	async def _update_db(self, nodes_info):
 		async with self._async_session() as session:
-			for node in nodes_info:
+			for node_from_responce in nodes_info:
 				try:
-					node_db = await session.execute(select(Node).filter_by(node_name = node['node_name']))
+					node_db = await session.execute(select(Node).filter_by(node_name = node_from_responce['node_name']))
 					node_db = node_db.one_or_none()[0].node_name
-					if node_db == node['node_name']:
-						print('update exists node')
+					if node_db == node_from_responce['node_name']:
+						# print('update exists node')
 						try:
 							new_record = Records(
 								score = 'score',
 								update_time = datetime.utcnow().timestamp(),
-								current_ds_epoch = node['current_ds_epoch'],
-								current_mini_epoch = node['current_mini_epoch'],
-								response_time = node['response_time']
+								current_ds_epoch = node_from_responce['current_ds_epoch'],
+								current_mini_epoch = node_from_responce['current_mini_epoch'],
+								response_time = node_from_responce['response_time']
 							)
-							node = await session.execute(select(Node).filter_by(node_name = node['node_name']).options(joinedload(Node.records)))
-							node = node.first()[0]
-							print(node)
-							node.records.append(new_record)
-							session.add(new_record)
-							await session.commit()
+							node_from_db = await session.execute(select(Node).filter_by(node_name = node_from_responce['node_name']).options(joinedload(Node.records)))
+							node_from_db = node_from_db.first()[0] 
+							
+							record_exist = await self._check_new_blocks(node_from_db, node_from_responce)
+							# print(record_exist)
+							if record_exist:
+								continue
+							else:
+								node_from_db.records.append(new_record)
+								session.add(new_record)
+								await session.commit()
 						except Exception as ex:
 							print('_update_db, if node_db', ex)
 				except Exception as ex:
@@ -67,15 +88,15 @@ class Worker():
 					try:
 						print('create new node')
 						new_node = Node(
-							node_url = node['node_url'],
-							node_name = node['node_name'],
+							node_url = node_from_responce['node_url'],
+							node_name = node_from_responce['node_name'],
 						)
 						new_record = Records(
 							score = 'score',
 							update_time = datetime.utcnow().timestamp(),
-							current_ds_epoch = node['current_ds_epoch'],
-							current_mini_epoch = node['current_mini_epoch'],
-							response_time = node['response_time']
+							current_ds_epoch = node_from_responce['current_ds_epoch'],
+							current_mini_epoch = node_from_responce['current_mini_epoch'],
+							response_time = node_from_responce['response_time']
 						)
 						new_node.records.append(new_record)
 						session.add(new_node)
