@@ -40,30 +40,32 @@ class Worker():
 
 	async def _update_db(self, nodes_info):
 		async with self._async_session() as session:
-			# print(nodes_info)
 			for node in nodes_info:
-				
-				# print(node['node_name'])
-				if await session.execute(select(Node).filter_by(node_name = node['node_name'])):
+				try:
+					node_db = await session.execute(select(Node).filter_by(node_name = node['node_name']))
+					node_db = node_db.one_or_none()[0].node_name
+					if node_db == node['node_name']:
+						print('update exists node')
+						try:
+							new_record = Records(
+								score = 'score',
+								update_time = datetime.utcnow().timestamp(),
+								current_ds_epoch = node['current_ds_epoch'],
+								current_mini_epoch = node['current_mini_epoch'],
+								response_time = node['response_time']
+							)
+							node = await session.execute(select(Node).filter_by(node_name = node['node_name']).options(joinedload(Node.records)))
+							node = node.first()[0]
+							print(node)
+							node.records.append(new_record)
+							session.add(new_record)
+							await session.commit()
+						except Exception as ex:
+							print('_update_db, if node_db', ex)
+				except Exception as ex:
+					print(ex)
 					try:
-						new_record = Records(
-							score = 'score',
-							update_time = datetime.utcnow().timestamp(),
-							current_ds_epoch = node['current_ds_epoch'],
-							current_mini_epoch = node['current_mini_epoch'],
-							response_time = node['response_time']
-						)
-						node = await session.execute(select(Node).filter_by(node_name = node['node_name']).options(joinedload(Node.records)))
-						node = node.first()[0]
-						print(node)
-						node.records.append(new_record)
-						session.add(new_record)
-						await session.commit()
-					except Exception as ex:
-						print('_update_db, exept1', ex)
-				else:
-					try:
-						print(node['node_name'])
+						print('create new node')
 						new_node = Node(
 							node_url = node['node_url'],
 							node_name = node['node_name'],
@@ -80,13 +82,13 @@ class Worker():
 						session.add(new_record)
 						await session.commit()
 					except Exception as ex:
-						print('_update_db, exept2',  ex)
+						print('_update_db, else if node_db',  ex)
+					
 
 				
 if __name__ == '__main__':
 	engine = create_async_engine('sqlite+aiosqlite:///database.db')
 	async_session = async_sessionmaker(engine)
-	# asyncio.run(write())
 	job = Worker(async_session)
 	
 	
