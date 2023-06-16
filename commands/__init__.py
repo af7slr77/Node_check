@@ -7,6 +7,7 @@ from commands.start import start
 from commands.help import help_comand, help_func
 from commands.nodes_buttons import get_nodes_list
 from aiogram import F
+from midelwares import RegisterCheck
 
 
 
@@ -16,3 +17,6 @@ def register_user_comands(router: Router):
     router.message.register(help_comand, Command(commands=['help']))
     router.message.register(help_func, F.text == 'help')
     router.message.register(get_nodes_list, Command(commands=['get_nodes']))
+
+    router.message.middleware(RegisterCheck())
+    router.callback_query.middleware(RegisterCheck())    

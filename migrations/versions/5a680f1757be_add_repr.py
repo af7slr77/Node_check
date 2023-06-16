@@ -1,8 +1,8 @@
 """add repr
 
-Revision ID: ba64859d0b61
+Revision ID: 5a680f1757be
 Revises: 
-Create Date: 2023-06-09 20:48:01.014470
+Create Date: 2023-06-16 19:43:47.819567
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'ba64859d0b61'
+revision = '5a680f1757be'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -31,14 +31,13 @@ def upgrade() -> None:
     sa.Column('user_telegram_id', sa.Integer(), nullable=False),
     sa.Column('username', sa.VARCHAR(length=32), nullable=False),
     sa.Column('reg_date', sa.Integer(), nullable=False),
-    sa.Column('upd_date', sa.Integer(), nullable=False),
-    sa.PrimaryKeyConstraint('user_id', 'user_telegram_id'),
+    sa.PrimaryKeyConstraint('user_id'),
     sa.UniqueConstraint('user_id'),
     sa.UniqueConstraint('user_telegram_id'),
     sa.UniqueConstraint('username')
     )
     op.create_table('records',
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('record_id', sa.Integer(), nullable=False),
     sa.Column('score', sa.Integer(), nullable=True),
     sa.Column('update_time', sa.Integer(), nullable=False),
     sa.Column('node_id', sa.Integer(), nullable=True),
@@ -46,8 +45,8 @@ def upgrade() -> None:
     sa.Column('current_mini_epoch', sa.Integer(), nullable=True),
     sa.Column('response_time', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['node_id'], ['nodes.node_id'], ),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('id')
+    sa.PrimaryKeyConstraint('record_id'),
+    sa.UniqueConstraint('record_id')
     )
     op.create_table('users_nodes',
     sa.Column('user_id', sa.Integer(), nullable=False),

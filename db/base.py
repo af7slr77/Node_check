@@ -35,11 +35,10 @@ class Node(BaseModel):
 
 class User(BaseModel):
 	__tablename__ = 'users'
-	user_id = Column(Integer, unique=True, nullable=False, primary_key = True)
-	user_telegram_id = Column(Integer, unique=True, nullable=False, primary_key = True)
+	user_id = Column(Integer, unique=True, nullable=False,  primary_key=True)
+	user_telegram_id = Column(Integer, unique=True, nullable=False)
 	username = Column(VARCHAR(32), unique=True, nullable=False)
 	reg_date = Column(Integer, nullable=False)
-	upd_date = Column(Integer, nullable=False)
 	
 	nodes = relationship('Node', secondary='users_nodes', back_populates='users')
 
@@ -49,7 +48,7 @@ class User(BaseModel):
 class Records(BaseModel):
 	__tablename__ = 'records'
 
-	id = Column(Integer, unique=True,  primary_key=True)
+	record_id = Column(Integer, unique=True,  primary_key=True)
 	score = Column(Integer)
 	update_time = Column(Integer, nullable=False)
 	node_id = Column(Integer, ForeignKey('nodes.node_id'))

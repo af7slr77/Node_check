@@ -9,6 +9,9 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import lazyload, joinedload
 
+from db import async_session
+
+
 class Worker():
 	interval = 10000
 	_async_session = None
@@ -19,10 +22,7 @@ class Worker():
 	async def run(self):
 		try:
 			nodes_info = await self._fetch_nodes()
-			# print(nodes_info)
 			await self._update_db(nodes_info)
-			# await self._get_all_records_db()
-			
 		except Exception as ex:
 			print('run worker job error: ',  ex)
 	
@@ -40,9 +40,8 @@ class Worker():
 			# 	print(i[0].nodes_id)
 
 	async def _check_new_blocks(self, node_from_db, node_from_responce):
-			# try:s
+			try:
 				last_block_record = node_from_db.records[-1]
-				# for record in last_block_records:
 				db_current_ds_epoch = last_block_record.current_ds_epoch
 				db_current_mini_epoch = last_block_record.current_mini_epoch
 				if db_current_mini_epoch == node_from_responce['current_mini_epoch']:
@@ -51,8 +50,8 @@ class Worker():
 				else:
 					print(db_current_mini_epoch, node_from_responce['current_mini_epoch'], db_current_mini_epoch == node_from_responce['current_mini_epoch'])
 					return False
-			# except Exception as ex:
-			# 	print('test check blocks', ex,)
+			except Exception as ex:
+					print('_check_new_blocks - func', ex,)
 
 	async def _update_db(self, nodes_info):
 		async with self._async_session() as session:
@@ -63,21 +62,20 @@ class Worker():
 					if node_db == node_from_responce['node_name']:
 						# print('update exists node')
 						try:
-							new_record = Records(
+							node_from_db = await session.execute(select(Node).filter_by(node_name = node_from_responce['node_name']).options(joinedload(Node.records)))
+							node_from_db = node_from_db.first()[0] 
+							
+							record_exist = await self._check_new_blocks(node_from_db, node_from_responce)
+							if record_exist:
+								continue
+							else:
+								new_record = Records(
 								score = 'score',
 								update_time = datetime.utcnow().timestamp(),
 								current_ds_epoch = node_from_responce['current_ds_epoch'],
 								current_mini_epoch = node_from_responce['current_mini_epoch'],
 								response_time = node_from_responce['response_time']
 							)
-							node_from_db = await session.execute(select(Node).filter_by(node_name = node_from_responce['node_name']).options(joinedload(Node.records)))
-							node_from_db = node_from_db.first()[0] 
-							
-							record_exist = await self._check_new_blocks(node_from_db, node_from_responce)
-							# print(record_exist)
-							if record_exist:
-								continue
-							else:
 								node_from_db.records.append(new_record)
 								session.add(new_record)
 								await session.commit()
@@ -108,8 +106,6 @@ class Worker():
 
 				
 if __name__ == '__main__':
-	engine = create_async_engine('sqlite+aiosqlite:///database.db')
-	async_session = async_sessionmaker(engine)
 	job = Worker(async_session)
 	
 	
