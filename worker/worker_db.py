@@ -15,9 +15,12 @@ from db import async_session
 class Worker():
 	interval = 10000
 	_async_session = None
+	# _node_name = None
+
 
 	def __init__(self, async_session):
 		self._async_session = async_session
+		# self._node_name = node_name
 
 	async def run(self):
 		try:
@@ -31,13 +34,22 @@ class Worker():
 		nodes_info = await get_nodes_info(urls)
 		return nodes_info
 
-	async def _get_all_records_db(self):
+	async def _get_one_node_from_db(self, node_name):
 		async with self._async_session() as session:
-			all_nodes = await session.execute(select(Node))
-			node = await session.execute(select(Node).filter_by(node_name = 'zilpay'))
-			print(dir(node))
+			node = await session.execute(select(Node).filter_by(node_name=node_name))
+			node = node.unique().one_or_none()[0]
+			# records = node.records()
+			result = [node,  ]
+			return result
+
+	async def _get_all_nodes_from_db(self):
+		async with self._async_session() as session:
+			all_nodes = await session.execute(select(Node).options(joinedload(Node.records)))
+			all_nodes = all_nodes.unique().all()
+			# print(dir(all_nodes.tuples()))
 			# for i in all_nodes:
-			# 	print(i[0].nodes_id)
+			#  	print(i[0].records[-1])
+			return all_nodes
 
 	async def _check_new_blocks(self, node_from_db, node_from_responce):
 			try:
@@ -109,4 +121,5 @@ if __name__ == '__main__':
 	job = Worker(async_session)
 	
 	
-	asyncio.run(job.run())
+	asyncio.run(job._get_all_nodes_from_db())
+	# asyncio.run(job.run())

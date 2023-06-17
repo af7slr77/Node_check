@@ -19,8 +19,6 @@ async def main():
         comands_for_bot.append(BotCommand(command=cmd[0], description=cmd[1]))
 
     dp = Dispatcher()
-    # dp.message.middleware(RegisterCheck)
-    # dp.callback_query.middleware(RegisterCheck)
     bot = Bot(token=os.getenv('NODE_TOKEN'))
     #Set commands
     await bot.set_my_commands(commands=comands_for_bot)

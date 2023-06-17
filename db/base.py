@@ -57,4 +57,4 @@ class Records(BaseModel):
 	response_time = Column(Integer)
 
 	def __repr__(self):
-		return f"{self.id, self.score, self.update_time, self.node_id, self.current_ds_epoch, self.current_mini_epoch, self.response_time}"
+		return f"{self.record_id, self.score, self.update_time, self.node_id, self.current_ds_epoch, self.current_mini_epoch, self.response_time}"
