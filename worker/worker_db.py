@@ -25,7 +25,7 @@ class Worker():
 	async def run(self):
 		try:
 			nodes_info = await self._fetch_nodes()
-			await self._update_db(nodes_info)
+			await self._update_node_db(nodes_info)
 		except Exception as ex:
 			print('run worker job error: ',  ex)
 	
@@ -36,7 +36,8 @@ class Worker():
 
 	async def _get_one_node_from_db(self, node_name):
 		async with self._async_session() as session:
-			node = await session.execute(select(Node).filter_by(node_name=node_name))
+			# node = await session.execute(select(Node).filter_by(node_name=node_name))
+			node = await session.execute(select(Node).filter_by(node_name = node_name).options(joinedload(Node.records)))
 			node = node.unique().one_or_none()[0]
 			# records = node.records()
 			result = [node,  ]
@@ -46,9 +47,6 @@ class Worker():
 		async with self._async_session() as session:
 			all_nodes = await session.execute(select(Node).options(joinedload(Node.records)))
 			all_nodes = all_nodes.unique().all()
-			# print(dir(all_nodes.tuples()))
-			# for i in all_nodes:
-			#  	print(i[0].records[-1])
 			return all_nodes
 
 	async def _check_new_blocks(self, node_from_db, node_from_responce):
@@ -64,8 +62,11 @@ class Worker():
 					return False
 			except Exception as ex:
 					print('_check_new_blocks - func', ex,)
+	
+	async def subscribe():
+		pass
 
-	async def _update_db(self, nodes_info):
+	async def _update_node_db(self, nodes_info):
 		async with self._async_session() as session:
 			for node_from_responce in nodes_info:
 				try:
@@ -76,27 +77,22 @@ class Worker():
 						try:
 							node_from_db = await session.execute(select(Node).filter_by(node_name = node_from_responce['node_name']).options(joinedload(Node.records)))
 							node_from_db = node_from_db.first()[0] 
-							
-							record_exist = await self._check_new_blocks(node_from_db, node_from_responce)
-							if record_exist:
-								continue
-							else:
-								new_record = Records(
-								score = 'score',
-								update_time = datetime.utcnow().timestamp(),
-								current_ds_epoch = node_from_responce['current_ds_epoch'],
-								current_mini_epoch = node_from_responce['current_mini_epoch'],
-								response_time = node_from_responce['response_time']
-							)
-								node_from_db.records.append(new_record)
-								session.add(new_record)
-								await session.commit()
+							new_record = Records(
+							score = 'score',
+							update_time = datetime.utcnow().timestamp(),
+							current_ds_epoch = node_from_responce['current_ds_epoch'],
+							current_mini_epoch = node_from_responce['current_mini_epoch'],
+							response_time = node_from_responce['response_time']
+						)
+							node_from_db.records.append(new_record)
+							session.add(new_record)
+							await session.commit()
 						except Exception as ex:
 							print('_update_db, if node_db', ex)
 				except Exception as ex:
 					print(ex)
 					try:
-						print('create new node')
+						# print('create new node')
 						new_node = Node(
 							node_url = node_from_responce['node_url'],
 							node_name = node_from_responce['node_name'],
@@ -119,7 +115,4 @@ class Worker():
 				
 if __name__ == '__main__':
 	job = Worker(async_session)
-	
-	
-	asyncio.run(job._get_all_nodes_from_db())
-	# asyncio.run(job.run())
+	asyncio.run(job.run())
