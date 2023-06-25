@@ -10,9 +10,10 @@ from aiogram import F
 from midelwares import RegisterCheck
 from db import async_session
 import asyncio
-from .nodes_info import sent_nodes_info
+from .sent_nodes_info import sent_nodes_info
 from .get_nodes_list import nodes_list
-
+from .subscribe import subscribe
+from .subscribe_buttons import MyCallback
 
 def register_user_comands(router: Router):
 	# router.message.register(start, Command(commands=['start'])) - another variant
@@ -24,6 +25,8 @@ def register_user_comands(router: Router):
 	router.message.middleware(RegisterCheck())
 	router.callback_query.middleware(RegisterCheck())
 
+	router.callback_query.register(subscribe,  MyCallback.filter(F.action == 'subscribe'))
+	# keyboard's callbacks
 	for node in nodes_list:
 		router.callback_query.register(sent_nodes_info, F.data == f'{node}')
 		

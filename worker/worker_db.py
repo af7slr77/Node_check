@@ -4,7 +4,7 @@ from lib.get_nodes_urls import get_nodes_urls
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.base import Node, Records
+from db.base import Node, Records, User, UsersNodes
 from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import lazyload, joinedload
@@ -36,12 +36,9 @@ class Worker():
 
 	async def _get_one_node_from_db(self, node_name):
 		async with self._async_session() as session:
-			# node = await session.execute(select(Node).filter_by(node_name=node_name))
 			node = await session.execute(select(Node).filter_by(node_name = node_name).options(joinedload(Node.records)))
 			node = node.unique().one_or_none()[0]
-			# records = node.records()
-			result = [node,  ]
-			return result
+			return node
 
 	async def _get_all_nodes_from_db(self):
 		async with self._async_session() as session:
@@ -63,8 +60,22 @@ class Worker():
 			except Exception as ex:
 					print('_check_new_blocks - func', ex,)
 	
-	async def subscribe():
-		pass
+	async def _get_one_user_from_db(self, tg_user_id):
+		async with self._async_session() as session:
+			user = await session.execute(select(User).filter_by(user_telegram_id = tg_user_id ))
+			user = user.unique().one_or_none()[0]
+			return user
+
+	async def _subscribe(self, node_name, tg_user_id):
+		
+		async with self._async_session() as session:
+			node = await session.execute(select(Node).filter_by(node_name = node_name).options(joinedload(Node.records)))
+			node = node.unique().one_or_none()[0]
+			user = await session.execute(select(User).filter_by(user_telegram_id = tg_user_id ))
+			user = user.unique().one_or_none()[0]
+			user.nodes.append(node)
+			user.users_nodes.append(UsersNodes(Node=node))
+			await session.commit()
 
 	async def _update_node_db(self, nodes_info):
 		async with self._async_session() as session:

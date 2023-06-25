@@ -11,9 +11,7 @@ class UsersNodes(BaseModel):
 	__tablename__ = "users_nodes"
 
 	user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True, nullable=False)
-	node_id = Column(Integer,
-		ForeignKey('nodes.node_id'), primary_key=True, nullable=False
-	)
+	node_id = Column(Integer,ForeignKey('nodes.node_id'), primary_key=True, nullable=False)
 
 	def __repr__(self):
 		return f'{self.user_id, self.node_id}'
@@ -26,7 +24,7 @@ class Node(BaseModel):
 	node_url = Column(String, unique=True, nullable=False)
 	node_name = Column(String, nullable=False)
 
-	users = relationship('User', secondary='users_nodes', back_populates='nodes')
+	users = relationship('User', secondary='users_nodes', back_populates='nodes', lazy=True)
 	records = relationship('Records', backref='node', lazy=True)
 	
 	def __repr__(self):
@@ -40,10 +38,10 @@ class User(BaseModel):
 	username = Column(VARCHAR(32), unique=True, nullable=False)
 	reg_date = Column(Integer, nullable=False)
 	
-	nodes = relationship('Node', secondary='users_nodes', back_populates='users')
+	nodes = relationship('Node', secondary='users_nodes', back_populates='users', lazy=True)
 
 	def __repr__(self):
-		return f'{self.user_id, self.user_telegram_id, self.username, self.reg_date, self.upd_date}'
+		return f'{self.user_id, self.user_telegram_id, self.username, self.reg_date}'
 
 class Records(BaseModel):
 	__tablename__ = 'records'

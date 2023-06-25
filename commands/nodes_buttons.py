@@ -1,5 +1,4 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.utils.keyboard import ReplyKeyboardBuilder, ReplyKeyboardMarkup, KeyboardButton
 from aiogram import types
 from lib.get_nodes_urls import get_nodes_urls
 from .get_nodes_list import get_nodes_list
