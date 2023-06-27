@@ -26,7 +26,7 @@ def register_user_comands(router: Router):
 	router.callback_query.middleware(RegisterCheck())
 
 	router.callback_query.register(subscribe,  MyCallback.filter(F.action == 'subscribe'))
-	# keyboard's callbacks
+	# nodes keyboard's callbacks
 	for node in nodes_list:
 		router.callback_query.register(sent_nodes_info, F.data == f'{node}')
 		

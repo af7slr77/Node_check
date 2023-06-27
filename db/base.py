@@ -1,20 +1,20 @@
 import sqlalchemy as db
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey, VARCHAR
+from sqlalchemy import Column, Integer, String, ForeignKey, VARCHAR, Table
 from sqlalchemy.orm import relationship, lazyload
 from datetime import datetime
 from lib.get_nodes_urls import get_nodes_urls
 BaseModel = declarative_base()
 
 
-class UsersNodes(BaseModel):
-	__tablename__ = "users_nodes"
+# class UsersNodes(BaseModel):
+# 	__tablename__ = "users_nodes"
 
-	user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True, nullable=False)
-	node_id = Column(Integer,ForeignKey('nodes.node_id'), primary_key=True, nullable=False)
+# 	user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True, nullable=False)
+# 	node_id = Column(Integer,ForeignKey('nodes.node_id'), primary_key=True, nullable=False)
 
-	def __repr__(self):
-		return f'{self.user_id, self.node_id}'
+# 	def __repr__(self):
+# 		return f'{self.user_id, self.node_id}'
 
 
 class Node(BaseModel):
@@ -24,7 +24,17 @@ class Node(BaseModel):
 	node_url = Column(String, unique=True, nullable=False)
 	node_name = Column(String, nullable=False)
 
-	users = relationship('User', secondary='users_nodes', back_populates='nodes', lazy=True)
+	# users = relationship('User', secondary='users_nodes', back_populates='nodes', lazy=True)
+	users = relationship(
+        "User",
+        secondary=Table(
+            "nodes_users",
+            BaseModel.metadata,
+            Column("nodes.node_id", Integer, ForeignKey("nodes.node_id"), primary_key=True),
+            Column("users.user_id", Integer, ForeignKey("users.user_id"), primary_key=True),
+        ),
+        backref="nodes", lazy='selectin'
+    )
 	records = relationship('Records', backref='node', lazy=True)
 	
 	def __repr__(self):
@@ -38,7 +48,7 @@ class User(BaseModel):
 	username = Column(VARCHAR(32), unique=True, nullable=False)
 	reg_date = Column(Integer, nullable=False)
 	
-	nodes = relationship('Node', secondary='users_nodes', back_populates='users', lazy=True)
+	# nodes = relationship('Node', secondary='users_nodes_', back_populates='users', lazy=True)
 
 	def __repr__(self):
 		return f'{self.user_id, self.user_telegram_id, self.username, self.reg_date}'

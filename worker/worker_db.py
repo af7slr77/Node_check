@@ -4,7 +4,7 @@ from lib.get_nodes_urls import get_nodes_urls
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.base import Node, Records, User, UsersNodes
+from db.base import Node, Records, User # UsersNodes
 from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import lazyload, joinedload
@@ -73,8 +73,9 @@ class Worker():
 			node = node.unique().one_or_none()[0]
 			user = await session.execute(select(User).filter_by(user_telegram_id = tg_user_id ))
 			user = user.unique().one_or_none()[0]
-			user.nodes.append(node)
-			user.users_nodes.append(UsersNodes(Node=node))
+			
+			node.users.append(user)
+			session.add(node)
 			await session.commit()
 
 	async def _update_node_db(self, nodes_info):
