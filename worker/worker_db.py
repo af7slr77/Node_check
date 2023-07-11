@@ -1,6 +1,6 @@
 import asyncio
-from lib.get_nodes_info import get_nodes_info
-from lib.get_nodes_urls import get_nodes_urls
+from query_modules.get_nodes_info import get_nodes_info
+from query_modules.get_nodes_urls import get_nodes_urls
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
