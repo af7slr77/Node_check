@@ -30,7 +30,7 @@ class RegisterCheck(BaseMiddleware):
 				await event.answer('user does not exist')
 
 				try:
-					print('create new User')
+					# print('create new User')
 					new_user = User(
 						user_telegram_id = event.from_user.id,
 						username = event.from_user.username,

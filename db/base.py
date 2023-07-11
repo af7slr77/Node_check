@@ -25,7 +25,7 @@ class Node(BaseModel):
 	node_name = Column(String, nullable=False)
 
 	# users = relationship('User', secondary='users_nodes', back_populates='nodes', lazy=True)
-	users = relationship(
+	nodes_users = relationship(
         "User",
         secondary=Table(
             "nodes_users",

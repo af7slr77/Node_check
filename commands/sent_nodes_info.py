@@ -1,6 +1,6 @@
 from aiogram import types
 from db import async_session
-from worker import Worker
+from worker.worker_db import Worker
 from datetime import datetime
 from .subscribe_buttons import MyCallback
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup, InlineKeyboardButton

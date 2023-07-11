@@ -2,9 +2,9 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup, 
 from aiogram import types
 from lib.get_nodes_urls import get_nodes_urls
 from .get_nodes_list import get_nodes_list
+import asyncio
 
-
-buttons = get_nodes_list()
+buttons = asyncio.run(get_nodes_list())
 
 async def get_nodes_buttons(message:types.Message):
 	# buttons = get_nodes_urls()

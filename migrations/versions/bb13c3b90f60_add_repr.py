@@ -1,8 +1,8 @@
 """add repr
 
-Revision ID: e261bd31d626
+Revision ID: bb13c3b90f60
 Revises: 
-Create Date: 2023-06-27 20:39:23.361340
+Create Date: 2023-06-30 21:27:09.725691
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'e261bd31d626'
+revision = 'bb13c3b90f60'
 down_revision = None
 branch_labels = None
 depends_on = None

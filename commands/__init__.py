@@ -11,11 +11,12 @@ from midelwares import RegisterCheck
 from db import async_session
 import asyncio
 from .sent_nodes_info import sent_nodes_info
-from .get_nodes_list import nodes_list
+from .get_nodes_list import get_nodes_list
 from .subscribe import subscribe
 from .subscribe_buttons import MyCallback
+from .sending_warnings_to_users import sending_warnings_to_users
 
-def register_user_comands(router: Router):
+async def register_user_comands(router: Router):
 	# router.message.register(start, Command(commands=['start'])) - another variant
 	router.message.register(start, CommandStart())
 	router.message.register(help_comand, Command(commands=['help']))
@@ -27,6 +28,7 @@ def register_user_comands(router: Router):
 
 	router.callback_query.register(subscribe,  MyCallback.filter(F.action == 'subscribe'))
 	# nodes keyboard's callbacks
+	nodes_list = await get_nodes_list()
 	for node in nodes_list:
 		router.callback_query.register(sent_nodes_info, F.data == f'{node}')
 		
