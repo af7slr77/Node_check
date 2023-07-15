@@ -4,9 +4,9 @@ from query_modules.get_nodes_urls import get_nodes_urls
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.base import Node, Records, User # UsersNodes
+from db.base import Node, Records, User, NodesUsers
 from datetime import datetime
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.orm import lazyload, joinedload
 from sqlalchemy import func
 from db import async_session
@@ -24,7 +24,7 @@ class Worker():
 
 	async def run(self):
 		try:
-			while True:
+			# while True:
 				nodes_info = await self._fetch_nodes()
 				await self._update_node_db(nodes_info)
 				await self._checking_the_operation_of_node()
@@ -32,6 +32,15 @@ class Worker():
 			
 		except Exception as ex:
 			print('run worker job error: ',  ex)
+
+	async def _delete_user_from_user_nodes(self, node_name, tg_user_id):
+		async with self._async_session() as session:
+			node = await self._get_one_node_from_db(node_name)
+			user = await self._get_one_user_from_db(tg_user_id)
+			nodes_user_query = await session.execute(select(NodesUsers).filter_by(node_id=node.node_id))
+			nodes_user = nodes_user_query.unique().one_or_none()[0]
+			await session.delete(nodes_user)
+			await session.commit()
 
 	async def _get_max_curent_ds_epoch(self):
 		async with self._async_session() as session:
@@ -212,6 +221,6 @@ class Worker():
 					
 
 				
-if __name__ == '__main__':
-	job = Worker(async_session)
-	asyncio.run(job.run())
+# if __name__ == '__main__':
+# 	job = Worker(async_session)
+# 	asyncio.run(job.run())

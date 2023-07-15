@@ -7,14 +7,14 @@ from query_modules.get_nodes_urls import get_nodes_urls
 BaseModel = declarative_base()
 
 
-# class UsersNodes(BaseModel):
-# 	__tablename__ = "users_nodes"
+class NodesUsers(BaseModel):
+	__tablename__ = "nodes_users"
 
-# 	user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True, nullable=False)
-# 	node_id = Column(Integer,ForeignKey('nodes.node_id'), primary_key=True, nullable=False)
+	node_id = Column(Integer, ForeignKey("nodes.node_id"), primary_key=True, nullable=False)
+	user_id = Column(Integer, ForeignKey("users.user_id"), primary_key=True, nullable=False)
 
-# 	def __repr__(self):
-# 		return f'{self.user_id, self.node_id}'
+	def __repr__(self):
+		return f'{self.user_id, self.node_id}'
 
 
 class Node(BaseModel):
@@ -23,18 +23,7 @@ class Node(BaseModel):
 	node_id = Column(Integer, unique=True,  primary_key=True, nullable=False)
 	node_url = Column(String, unique=True, nullable=False)
 	node_name = Column(String, nullable=False)
-
-	# users = relationship('User', secondary='users_nodes', back_populates='nodes', lazy=True)
-	nodes_users = relationship(
-        "User",
-        secondary=Table(
-            "nodes_users",
-            BaseModel.metadata,
-            Column("nodes.node_id", Integer, ForeignKey("nodes.node_id"), primary_key=True),
-            Column("users.user_id", Integer, ForeignKey("users.user_id"), primary_key=True),
-        ),
-        backref="nodes", lazy='selectin'
-    )
+	nodes_users = relationship("User", secondary='nodes_users', backref='nodes', lazy='selectin', )
 	records = relationship('Records', backref='node', lazy=True)
 	
 	def __repr__(self):
@@ -47,6 +36,7 @@ class User(BaseModel):
 	user_telegram_id = Column(Integer, unique=True, nullable=False)
 	username = Column(VARCHAR(32), unique=True, nullable=False)
 	reg_date = Column(Integer, nullable=False)
+	users_nodes = relationship('Node', secondary='nodes_users', backref='users', lazy='selectin')
 	
 	# nodes = relationship('Node', secondary='users_nodes_', back_populates='users', lazy=True)
 

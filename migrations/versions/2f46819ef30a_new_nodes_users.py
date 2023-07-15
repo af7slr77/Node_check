@@ -1,8 +1,8 @@
-"""add repr
+"""new Nodes_users
 
-Revision ID: bb13c3b90f60
+Revision ID: 2f46819ef30a
 Revises: 
-Create Date: 2023-06-30 21:27:09.725691
+Create Date: 2023-07-15 18:01:44.266685
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bb13c3b90f60'
+revision = '2f46819ef30a'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -37,11 +37,11 @@ def upgrade() -> None:
     sa.UniqueConstraint('username')
     )
     op.create_table('nodes_users',
-    sa.Column('nodes.node_id', sa.Integer(), nullable=False),
-    sa.Column('users.user_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['nodes.node_id'], ['nodes.node_id'], ),
-    sa.ForeignKeyConstraint(['users.user_id'], ['users.user_id'], ),
-    sa.PrimaryKeyConstraint('nodes.node_id', 'users.user_id')
+    sa.Column('node_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['node_id'], ['nodes.node_id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.user_id'], ),
+    sa.PrimaryKeyConstraint('node_id', 'user_id')
     )
     op.create_table('records',
     sa.Column('record_id', sa.Integer(), nullable=False),

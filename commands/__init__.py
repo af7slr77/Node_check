@@ -13,7 +13,9 @@ import asyncio
 from .sent_nodes_info import sent_nodes_info
 from .get_nodes_list import get_nodes_list
 from .subscribe import subscribe
-from .subscribe_buttons import MyCallback
+from .cancel_subscription import cancel_subscription
+from .my_nodes import my_nodes
+from .callbacks import SubscribeCallback, CancelSubscriptionCallback, MyNodesCallback
 from .sending_warnings_to_users import sending_warnings_to_users
 
 async def register_user_comands(router: Router):
@@ -26,7 +28,9 @@ async def register_user_comands(router: Router):
 	router.message.middleware(RegisterCheck())
 	router.callback_query.middleware(RegisterCheck())
 
-	router.callback_query.register(subscribe,  MyCallback.filter(F.action == 'subscribe'))
+	router.callback_query.register(subscribe,  SubscribeCallback.filter(F.action == 'subscribe'))
+	router.callback_query.register(cancel_subscription,  CancelSubscriptionCallback.filter(F.action == 'cancel_subscription'))
+	router.callback_query.register(my_nodes,  MyNodesCallback.filter(F.action == 'my_nodes'))
 	# nodes keyboard's callbacks
 	nodes_list = await get_nodes_list()
 	for node in nodes_list:
