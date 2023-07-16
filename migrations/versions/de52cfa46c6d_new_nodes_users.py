@@ -1,8 +1,8 @@
 """new Nodes_users
 
-Revision ID: 2f46819ef30a
+Revision ID: de52cfa46c6d
 Revises: 
-Create Date: 2023-07-15 18:01:44.266685
+Create Date: 2023-07-16 15:26:48.262212
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '2f46819ef30a'
+revision = 'de52cfa46c6d'
 down_revision = None
 branch_labels = None
 depends_on = None

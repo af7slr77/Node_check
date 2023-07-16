@@ -36,7 +36,7 @@ class User(BaseModel):
 	user_telegram_id = Column(Integer, unique=True, nullable=False)
 	username = Column(VARCHAR(32), unique=True, nullable=False)
 	reg_date = Column(Integer, nullable=False)
-	users_nodes = relationship('Node', secondary='nodes_users', backref='users', lazy='selectin')
+	users_nodes = relationship('Node', secondary='nodes_users', backref='users', lazy='selectin', viewonly=True )
 	
 	# nodes = relationship('Node', secondary='users_nodes_', back_populates='users', lazy=True)
 

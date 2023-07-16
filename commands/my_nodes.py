@@ -8,5 +8,13 @@ async def my_nodes(call: types.CallbackQuery, callback_data: MyNodesCallback):
     tg_user_id = call.from_user.id
     worker = Worker(async_session)
     user = await worker._get_one_user_from_db(tg_user_id)
-    print(user.users_nodes)
-    # await call.message.answer(text=f'{tg_user_id}, {node_name}')
+    users_nodes = user.users_nodes
+    msg = ''
+    count = 0
+    for node in users_nodes:
+        msg = msg + f"{node.node_name}\n"
+        count += 1
+        if count == len(users_nodes):
+            await call.message.answer(text=msg)
+        else:
+            pass
