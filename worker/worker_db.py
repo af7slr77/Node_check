@@ -6,13 +6,12 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
 from db.base import Node, Records, User, NodesUsers
 from datetime import datetime
-from sqlalchemy import select, delete
+from sqlalchemy import select
 from sqlalchemy.orm import lazyload, joinedload
 from sqlalchemy import func
 from db import async_session
 import time
 from commands.sending_warnings_to_users import sending_warnings_to_users
-# from commands.get_nodes_list import get_nodes_data
 
 
 class Worker():
