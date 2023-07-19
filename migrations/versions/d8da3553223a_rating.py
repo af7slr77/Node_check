@@ -1,8 +1,8 @@
-"""new Nodes_users
+"""rating
 
-Revision ID: de52cfa46c6d
+Revision ID: d8da3553223a
 Revises: 
-Create Date: 2023-07-16 15:26:48.262212
+Create Date: 2023-07-19 15:40:52.487017
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'de52cfa46c6d'
+revision = 'd8da3553223a'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -51,6 +51,7 @@ def upgrade() -> None:
     sa.Column('current_ds_epoch', sa.Integer(), nullable=True),
     sa.Column('current_mini_epoch', sa.Integer(), nullable=True),
     sa.Column('response_time', sa.Integer(), nullable=True),
+    sa.Column('rating', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['node_id'], ['nodes.node_id'], ),
     sa.PrimaryKeyConstraint('record_id'),
     sa.UniqueConstraint('record_id')

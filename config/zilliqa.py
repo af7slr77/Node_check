@@ -1,2 +1,2 @@
 MAIN_NODE = 'https://api.zilliqa.com/'
-MAX_NODE_TIMEOUT_SECOND = 6
+MAX_NODE_TIMEOUT_SECOND = 10
