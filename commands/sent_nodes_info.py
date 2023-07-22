@@ -20,5 +20,5 @@ async def sent_nodes_info(call: types.CallbackQuery):
 	subscribe_kb.row(InlineKeyboardButton(text='My nodes',  callback_data=MyNodesCallback(node_name=node_name, action='my_nodes').pack()))
 
 
-	msg = f"{node.node_name}:\n" "\n" f"URL:  {node.node_url}\n" "\n" f"Rating:  {node_records.rating}\n" "\n" f"Current ds epoch:  {node_records.current_ds_epoch}\n" "\n" f"Current mini epoch:  {node_records.current_mini_epoch}\n" "\n" f"Last update:  {update_time}\n"
+	msg = f"{node.node_name}:\n" "\n" f"URL:  {node.node_url}\n" "\n" f"Rating:  {node_records.rating}%\n" "\n" f"Current ds epoch:  {node_records.current_ds_epoch}\n" "\n" f"Current mini epoch:  {node_records.current_mini_epoch}\n" "\n" f"Last update:  {update_time}\n"
 	await call.message.answer(text=msg, reply_markup=subscribe_kb.as_markup())

@@ -13,6 +13,5 @@ async def help_comand(message: types.Message, command: CommandObject):
 	else:
 		return await help_func(message)
 
-
 async def help_func(message:types.Message):
 	return await message.answer('For help use /help <command>')

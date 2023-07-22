@@ -12,6 +12,7 @@ from sqlalchemy import func
 from db import async_session
 import time
 from commands.sending_warnings_to_users import sending_warnings_to_users
+from config import MAX_DIFFERENCE_OF_BLOCKS, MIN_DIFFERENCE_OF_BLOCKS, MAX_RESPONSE_SECONDS, MIN_RESPONSE_SECONDS, AVERAGE_RESPONSE_SECONDS
 
 
 class Worker():
@@ -25,7 +26,7 @@ class Worker():
 		try:
 			while True:
 				nodes_info = await self._fetch_nodes()
-				await self._update_node_db(nodes_info)
+				await self._write_or_update_node_to_db(nodes_info)
 				await self._checking_the_operation_of_node()
 				time.sleep(30)
 			
@@ -56,7 +57,6 @@ class Worker():
 	async def _checking_the_operation_of_node(self):
 		async with self._async_session() as session:
 			max_mini_epoch = await self._get_max_current_mini_epoch()
-			
 			all_nodes =  await self._get_all_nodes_from_db()
 			for node in all_nodes:
 				node_name = node[0].node_name
@@ -149,22 +149,22 @@ class Worker():
 		response_time_score = None
 		total_score = None
 		if current_mini_epoch is not None:
-			if current_mini_epoch >= max_mini_epoch - 1:
+			if current_mini_epoch >= max_mini_epoch - MIN_DIFFERENCE_OF_BLOCKS:
 				mini_epoch_score = 2
-				if response_time > 6 and response_time < 8:
+				if response_time > AVERAGE_RESPONSE_SECONDS and response_time < MAX_RESPONSE_SECONDS:
 					response_time_score = 1
 					total_score = mini_epoch_score + response_time_score
 					return total_score
-				elif response_time > 2 and response_time < 6:
+				elif response_time > MIN_RESPONSE_SECONDS and response_time < AVERAGE_RESPONSE_SECONDS:
 					response_time_score = 2
 					total_score = mini_epoch_score + response_time_score
 					return total_score
-				elif response_time < 2:
+				elif response_time < MIN_RESPONSE_SECONDS:
 					response_time_score = 3
 					total_score = mini_epoch_score + response_time_score
 					return total_score
-			elif current_mini_epoch < max_mini_epoch - 2:
-				mini_epoch_score = -1
+			elif current_mini_epoch < max_mini_epoch - MAX_DIFFERENCE_OF_BLOCKS:
+				mini_epoch_score = 0
 				return mini_epoch_score
 		else: 
 			total_score = 0
@@ -189,64 +189,80 @@ class Worker():
 	async def _get_rating(self, node_name, last_score_from_db):
 			ratings_number = await self._get_ratings_number(node_name)
 			maximum_score = 5 * ratings_number
-			rating = (last_score_from_db / maximum_score)*100
+			rating = (last_score_from_db / maximum_score) * 100
 			return rating
 
+	async def _cereate_new_node(self, node_args):
+		new_node = Node(
+			node_url = node_args['node_url'],
+			node_name = node_args['node_name'],
+			)
+		return new_node
 
-	async def _update_node_db(self, nodes_info):
+	async def _cereate_new_record(self, record_args):
+		new_record = Records(
+			update_time = datetime.utcnow().timestamp(),
+			current_ds_epoch = record_args['current_ds_epoch'],
+			current_mini_epoch = record_args['current_mini_epoch'],
+			response_time = record_args['response_time'],
+			score = record_args['score'],
+			rating = record_args['rating']
+			)
+		return new_record
+
+	async def _write_node_db(self, node_from_responce):
+		restatrs_count = 0
 		async with self._async_session() as session:
-			for node_from_responce in nodes_info:
-				try:
-					node_db = await self._get_one_node_from_db(node_from_responce['node_name'])
-					if node_db is not None:
-						node_name = node_db.node_name
-						max_mini_epoch = int(await self._get_max_current_mini_epoch())
-						current_mini_epoch = node_from_responce['current_mini_epoch']
-						response_time = node_from_responce['response_time']
-						last_score_from_db = int(await self._get_last_node_score(node_name))
-						current_responce_score = await self._current_score(current_mini_epoch, response_time, max_mini_epoch)
-						rating = round(await self._get_rating(node_name, last_score_from_db), 2)
-						print(rating)
-						if node_db.node_name == node_from_responce['node_name']:
-							try:
-								node_from_db = await session.execute(select(Node).filter_by(node_name = node_from_responce['node_name']).options(joinedload(Node.records)))
-								node_from_db = node_from_db.first()[0]
-								new_record = Records(
-									update_time = datetime.utcnow().timestamp(),
-									current_ds_epoch = node_from_responce['current_ds_epoch'],
-									current_mini_epoch = current_mini_epoch,
-									response_time = response_time,
-									score = last_score_from_db + current_responce_score,
-									rating = rating
-									)
-								node_from_db.records.append(new_record)
-								session.add(new_record)
-								await session.commit()
-							except Exception as ex:
-								print('_update_db, if node_db', ex)
-				except Exception as ex:
-					# print('create new user')
-					try:
-						# print('create new node')
-						new_node = Node(
-							node_url = node_from_responce['node_url'],
-							node_name = node_from_responce['node_name'],
-						)
-						new_record = Records(
-							score = 0,
-							update_time = datetime.utcnow().timestamp(),
-							current_ds_epoch = node_from_responce['current_ds_epoch'],
-							current_mini_epoch = node_from_responce['current_mini_epoch'],
-							response_time = node_from_responce['response_time'],
-							rating = 0
-						)
-						new_node.records.append(new_record)
-						session.add(new_node)
-						session.add(new_record)
-						await session.commit()
-					except Exception as ex:
-						print('_update_db, else if node_db',  ex)
-				
+			node_url = node_from_responce['node_url'],
+			node_name = node_from_responce['node_name']
+			current_ds_epoch = node_from_responce['current_ds_epoch']
+			current_mini_epoch = node_from_responce['current_mini_epoch']
+			response_time = node_from_responce['response_time']
+			node_db = await self._get_one_node_from_db(node_from_responce['node_name'])
+			if node_db is not None:
+				node_name = node_db.node_name
+				max_mini_epoch = int(await self._get_max_current_mini_epoch())
+				last_score_from_db = int(await self._get_last_node_score(node_name))
+				current_responce_score = await self._current_score(current_mini_epoch, response_time, max_mini_epoch)
+				score = last_score_from_db + current_responce_score
+				rating = round(await self._get_rating(node_name, last_score_from_db))
+				record_args = {
+					'current_ds_epoch': current_ds_epoch,
+					'current_mini_epoch': current_mini_epoch,
+					'response_time': response_time,
+					'score': last_score_from_db,
+					'rating': rating
+				}
+				new_record = await self._cereate_new_record(record_args)
+				node_db.records.append(new_record)
+				session.add(new_record)
+				await session.commit()
+			else:
+				node_args = {
+					'node_url': node_url,
+					'node_name' : node_name
+				}
+
+				record_args = {
+					'current_ds_epoch': current_ds_epoch,
+					'current_mini_epoch': current_mini_epoch,
+					'response_time': response_time,
+					'score': 0,
+					'rating': 0
+				}
+				new_node = await self._cereate_new_record(node_args)
+				new_record = await self._cereate_new_record(record_args)
+				new_node.records.append(new_record)
+				session.add(new_node)
+				session.add(new_record)
+				await session.commit()
+
+	async def _write_or_update_node_to_db(self, nodes_info):
+		for node_from_responce in nodes_info:
+			try:
+				await self._write_node_db(node_from_responce)
+			except Exception as ex:
+				print('exeption',  ex)
 # if __name__ == '__main__':
 # 	job = Worker(async_session)
 # 	asyncio.run(job.run())

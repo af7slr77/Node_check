@@ -31,16 +31,16 @@ async def bot():
 	await dp.start_polling(bot, async_session=async_session)
 
 async def thread1_func():
-	await bot()
-	# pass
+	# await bot()
+	pass
 
 async def thread2_func():
-	pass
+	# pass
 	# while True:
-	# engine = create_async_engine('sqlite+aiosqlite:///database.db')
-	# async_session = async_sessionmaker(engine)
-	# worker = Worker(async_session)
-	# await worker.run()
+	engine = create_async_engine('sqlite+aiosqlite:///database.db')
+	async_session = async_sessionmaker(engine)
+	worker = Worker(async_session)
+	await worker.run()
 
 async def main():
 	await asyncio.gather(thread1_func(), thread2_func())
