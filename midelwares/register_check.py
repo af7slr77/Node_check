@@ -18,7 +18,6 @@ class RegisterCheck(BaseMiddleware):
 		event: Union[Message, CallbackQuery],
 		data: Dict[str, Any] 
 	) -> Any:
-		# print(data)
 		async_session: async_session = data['async_session']
 		async with async_session() as session:
 			result = await session.execute(select(User).where(User.user_telegram_id == event.from_user.id))

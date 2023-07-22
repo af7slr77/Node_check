@@ -57,3 +57,15 @@ class Records(BaseModel):
 
 	def __repr__(self):
 		return f"{self.record_id, self.score, self.update_time, self.node_id, self.current_ds_epoch, self.current_mini_epoch, self.response_time}"
+	
+class Blocks(BaseModel):
+	__tablename__ = 'blocks'
+
+	record_id = Column(Integer, unique=True,  primary_key=True)
+	update_time = Column(Integer, nullable=False)
+	current_ds_epoch = Column(Integer)
+	current_mini_epoch = Column(Integer)
+	response_time = Column(Integer)
+
+	def __repr__(self):
+		return f"{self.record_id, self.update_time, self.current_ds_epoch, self.current_mini_epoch, self.response_time}"

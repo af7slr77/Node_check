@@ -1,6 +1,6 @@
 import asyncio
-from query_modules.get_nodes_info import get_nodes_info
-from query_modules.get_nodes_urls import get_nodes_urls
+from query_modules_2.get_nodes_info import get_nodes_info
+from query_modules_2.get_nodes_urls import get_nodes_urls
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -54,45 +54,47 @@ class Worker():
 			max_current_mini_epoch = max_curent_ds_epoch_query.unique().one_or_none()[0]
 			return max_current_mini_epoch
 
+	async def _sending_warnings(self, nodes_users, args):
+		for user in nodes_users:
+			user_telegram_id = user.user_telegram_id
+			if user_telegram_id:
+				await sending_warnings_to_users(user_telegram_id, args)
+			else:
+				pass
+
+	async def _searching_for_empty_values_and_delays(self, node, max_mini_epoch):
+		node_name = node[0].node_name
+		last_record = node[0].records[-1]
+		current_ds_epoch = last_record.current_ds_epoch
+		current_mini_epoch = last_record.current_mini_epoch
+		nodes_users = node[0].nodes_users
+		if current_ds_epoch == None:
+			args = {
+				'node_name': node_name,
+				'current_ds_epoch': current_ds_epoch
+			}
+			await self._sending_warnings(nodes_users, args)
+		else:
+			if current_mini_epoch < max_mini_epoch - MAX_DIFFERENCE_OF_BLOCKS:
+				mini_epoch_diff = max_mini_epoch - current_mini_epoch
+				args = {
+					'node_name': node_name,
+					'current_ds_epoch': current_ds_epoch,
+					'mini_epoch_diff': mini_epoch_diff
+				}
+				await self._sending_warnings(nodes_users, args)			
+
 	async def _checking_the_operation_of_node(self):
 		async with self._async_session() as session:
 			max_mini_epoch = await self._get_max_current_mini_epoch()
 			all_nodes =  await self._get_all_nodes_from_db()
 			for node in all_nodes:
-				node_name = node[0].node_name
-				last_record = node[0].records[-1]
-				current_ds_epoch = last_record.current_ds_epoch
-				current_mini_epoch = last_record.current_mini_epoch
-				nodes_users = node[0].nodes_users
-				if current_ds_epoch == None:
-					for user in nodes_users:
-						user_telegram_id = user.user_telegram_id
-						if user_telegram_id:
-							args = {
-								'node_name': node_name,
-								'current_ds_epoch': current_ds_epoch
-							}
-							await sending_warnings_to_users(user_telegram_id, args)
-						else:
-							pass	
-				else:
-					if current_mini_epoch < max_mini_epoch - 1:
-						for user in nodes_users:
-							user_telegram_id = user.user_telegram_id
-							if user_telegram_id:
-								mini_epoch_diff = max_mini_epoch - current_mini_epoch
-								args = {
-									'node_name': node_name,
-									'current_ds_epoch': current_ds_epoch,
-									'mini_epoch_diff': mini_epoch_diff
-								}
-								await sending_warnings_to_users(user_telegram_id, args)
-							else:
-								pass
+				await self._searching_for_empty_values_and_delays(node, max_mini_epoch)
 
 	async def _fetch_nodes(self):
 		urls = get_nodes_urls()
-		nodes_info = await get_nodes_info(urls)
+		# nodes_info = await get_nodes_info(urls)
+		nodes_info = get_nodes_info(urls)
 		return nodes_info
 
 	async def _get_one_node_from_db(self, node_name):
@@ -211,7 +213,6 @@ class Worker():
 		return new_record
 
 	async def _write_node_db(self, node_from_responce):
-		restatrs_count = 0
 		async with self._async_session() as session:
 			node_url = node_from_responce['node_url'],
 			node_name = node_from_responce['node_name']
@@ -263,6 +264,3 @@ class Worker():
 				await self._write_node_db(node_from_responce)
 			except Exception as ex:
 				print('exeption',  ex)
-# if __name__ == '__main__':
-# 	job = Worker(async_session)
-# 	asyncio.run(job.run())

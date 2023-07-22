@@ -12,6 +12,7 @@ async def call_url(node_url, name):
 		"params": [""]
 		} )
 	headers = {"Content-Type": "application/json"}
+	
 
 	async with aiohttp.ClientSession(trust_env=True) as session:
 		try:
