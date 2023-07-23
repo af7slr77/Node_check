@@ -18,8 +18,7 @@ def call_url(node_url, name):
 
 	try:
 		start_time = time()
-		
-		resp = requests.post(node_url, data=params, headers=headers, timeout = MAX_NODE_TIMEOUT_SECOND, proxies=proxies).json()
+		resp = requests.post(node_url, data=params, headers=headers, timeout = MAX_NODE_TIMEOUT_SECOND).json()
 		end_time = time()
 		response_time = end_time - start_time
 		current_ds_epoch = int(resp['result']['CurrentDSEpoch'])

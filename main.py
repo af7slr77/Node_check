@@ -9,6 +9,7 @@ from aiogram.types import BotCommand
 from midelwares import RegisterCheck
 from aiogram import BaseMiddleware
 from worker.worker_db import Worker
+from block_worker.blocks_db import BlocksWorker
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from sqlalchemy.ext.asyncio import create_async_engine

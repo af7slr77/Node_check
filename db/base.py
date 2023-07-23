@@ -61,7 +61,7 @@ class Records(BaseModel):
 class Blocks(BaseModel):
 	__tablename__ = 'blocks'
 
-	record_id = Column(Integer, unique=True,  primary_key=True)
+	block_id = Column(Integer, unique=True,  primary_key=True)
 	update_time = Column(Integer, nullable=False)
 	current_ds_epoch = Column(Integer)
 	current_mini_epoch = Column(Integer)

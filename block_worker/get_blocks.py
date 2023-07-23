@@ -1,7 +1,7 @@
 import requests
 import json
 from config.zilliqa import MAIN_NODE, MAX_NODE_TIMEOUT_SECOND
-
+from time import time
 
 def get_blocks():
 	params = json.dumps( {
@@ -11,16 +11,18 @@ def get_blocks():
 		"params": [""]
 	} )
 	headers = {"Content-Type": "application/json"}
-
+	start = time()
 	result = requests.post(MAIN_NODE, data=params, headers=headers, timeout = MAX_NODE_TIMEOUT_SECOND).json()
-	# urls = []
+	stop = time()
+	responce_time = start - stop
 	current_ds_epoch = result['result']['CurrentDSEpoch']
 	current_mini_epoch = result['result']['CurrentMiniEpoch']
 	blocks = {
 		'current_ds_epoch': current_ds_epoch,
-		'current_mini_epoch': current_mini_epoch
+		'current_mini_epoch': current_mini_epoch,
+		'response_time': responce_time
 	}
 	return blocks
 
 if __name__ == '__main__':
-	get_nodes_urls()
+	print(get_blocks())
