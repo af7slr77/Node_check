@@ -15,7 +15,6 @@ def call_url(node_url, name):
     # 'http': '207.246.86.43:6802',
     'http': 'socks4://169.239.223.136:52178'
 }
-
 	try:
 		start_time = time()
 		resp = requests.post(node_url, data=params, headers=headers, timeout = MAX_NODE_TIMEOUT_SECOND).json()
@@ -23,14 +22,15 @@ def call_url(node_url, name):
 		response_time = end_time - start_time
 		current_ds_epoch = int(resp['result']['CurrentDSEpoch'])
 		current_mini_epoch = int(resp['result']['CurrentMiniEpoch'])
-		return {
-			'status': 200,
-			'node_url':node_url , 
-			'node_name': name.lower(), 
-			'current_ds_epoch': current_ds_epoch, 
-			'current_mini_epoch': current_mini_epoch,
-			'response_time': response_time
-		}
+		if response_time < MAX_NODE_TIMEOUT_SECOND:
+			return {
+				'status': 200,
+				'node_url': node_url , 
+				'node_name': name.lower(), 
+				'current_ds_epoch': current_ds_epoch, 
+				'current_mini_epoch': current_mini_epoch,
+				'response_time': response_time
+			}
 	except Exception as ex:
 		print(ex)
 		current_ds_epoch = None
@@ -41,7 +41,7 @@ def call_url(node_url, name):
 			'node_name': name.lower(), 
 			'current_ds_epoch': current_ds_epoch, 
 			'current_mini_epoch': current_mini_epoch,
-			'response_time': 0
+			'response_time': None
 		}
 
 if __name__ == '__main__':

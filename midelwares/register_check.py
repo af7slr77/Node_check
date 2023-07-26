@@ -10,8 +10,6 @@ from db import async_session
 from datetime import datetime
 
 class RegisterCheck(BaseMiddleware):
-
-
 	async def __call__(
 		self,
 		handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
@@ -23,13 +21,9 @@ class RegisterCheck(BaseMiddleware):
 			result = await session.execute(select(User).where(User.user_telegram_id == event.from_user.id))
 			user = result.one_or_none()
 			if user is not None:
-				await event.answer('user exist')
 				pass
 			else:
-				await event.answer('user does not exist')
-
 				try:
-					# print('create new User')
 					new_user = User(
 						user_telegram_id = event.from_user.id,
 						username = event.from_user.username,
@@ -39,8 +33,6 @@ class RegisterCheck(BaseMiddleware):
 					await session.commit()
 				except Exception as ex:
 					print('RegisterCheck',  ex)
-
-
 		return await handler(event, data)
 	
 # if __name__ == '__main__':

@@ -18,7 +18,7 @@ def get_nodes_urls():
 	for key in nodes_data:
 		url = nodes_data[key]['arguments'][5]
 		name = nodes_data[key]['arguments'][3]
-		urls.append({'node_url':url, 'name':name})
+		urls.append({'node_url':url, 'name':name.lower()})
 	return urls
 
 if __name__ == '__main__':

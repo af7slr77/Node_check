@@ -11,18 +11,26 @@ def get_blocks():
 		"params": [""]
 	} )
 	headers = {"Content-Type": "application/json"}
-	start = time()
-	result = requests.post(MAIN_NODE, data=params, headers=headers, timeout = MAX_NODE_TIMEOUT_SECOND).json()
-	stop = time()
-	responce_time = start - stop
-	current_ds_epoch = result['result']['CurrentDSEpoch']
-	current_mini_epoch = result['result']['CurrentMiniEpoch']
-	blocks = {
-		'current_ds_epoch': current_ds_epoch,
-		'current_mini_epoch': current_mini_epoch,
-		'response_time': responce_time
-	}
-	return blocks
+	try:
+		start = time()
+		result = requests.post(MAIN_NODE, data=params, headers=headers, timeout = MAX_NODE_TIMEOUT_SECOND).json()
+		stop = time()
+		responce_time = stop - start
+		current_ds_epoch = result['result']['CurrentDSEpoch']
+		current_mini_epoch = result['result']['CurrentMiniEpoch']
+		blocks = {
+			'current_ds_epoch': current_ds_epoch,
+			'current_mini_epoch': current_mini_epoch,
+			'response_time': responce_time
+		}
+		return blocks
+	except Exception:
+		blocks = {
+			'current_ds_epoch': None,
+			'current_mini_epoch': None,
+			'response_time': None
+		}
+		return blocks
 
 if __name__ == '__main__':
 	print(get_blocks())
