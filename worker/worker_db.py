@@ -275,7 +275,7 @@ class Worker():
 			urls = get_nodes_urls()
 			for url in urls:
 				responce = call_url(url['node_url'], url['name'])
-				# print(responce)
+				print(responce)
 				await self._write_node_db(responce)
 				time.sleep(PAUSE_BETWEEN_REQUESTS)
 		except Exception as ex:

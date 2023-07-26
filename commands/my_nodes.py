@@ -13,6 +13,7 @@ async def my_nodes(call: types.CallbackQuery, callback_data: MyNodesCallback):
 	users_nodes = user.users_nodes
 	if users_nodes == []:
 		await call.message.answer(text='You are not subscribed to any node!')
+		await call.message.answer(text='To get a list of available nodes, select the command: /get_nodes <command>')
 	else:
 		new_users_nodes = [users_nodes[i:i+2] for i in range(0, len(users_nodes), 2)]
 		inline_kb = InlineKeyboardBuilder()

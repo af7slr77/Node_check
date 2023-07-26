@@ -12,6 +12,6 @@ async def help_comand(message: types.Message, command: CommandObject):
 			return await message.answer(text='Comand not found')
 	else:
 		return await help_func(message)
-		
+	
 async def help_func(message:types.Message):
 	return await message.answer('To get a list of available nodes, select the command: /get_nodes <command>')

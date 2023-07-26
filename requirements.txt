@@ -18,6 +18,7 @@ Mako==1.2.4
 MarkupSafe==2.1.2
 multidict==6.0.4
 pydantic==1.10.7
+PySocks==1.7.1
 pytz==2023.3
 requests==2.28.2
 SQLAlchemy==2.0.9
