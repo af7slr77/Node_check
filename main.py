@@ -5,7 +5,7 @@ import os
 from commands import register_user_comands
 from commands.bot_commands import bot_commands
 from aiogram.types import BotCommand
-from db import async_session
+from db.engine import async_session
 
 async def bot():
 	logging.basicConfig(level=logging.INFO)

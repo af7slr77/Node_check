@@ -1,11 +1,12 @@
 import asyncio
 from .get_blocks import get_blocks
-from db.base import Node, Records, User, NodesUsers, Blocks
+# from db.base import Node, Records, User, NodesUsers, Blocks
+from models.models import Blocks
 from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import lazyload, joinedload
 from sqlalchemy import func
-from db import async_session
+from db.engine import async_session
 import time
 from config import MAX_DIFFERENCE_OF_BLOCKS, MIN_DIFFERENCE_OF_BLOCKS, MAX_RESPONSE_SECONDS, MIN_RESPONSE_SECONDS, AVERAGE_RESPONSE_SECONDS
 
@@ -21,8 +22,7 @@ class BlocksWorker():
 				block_info = get_blocks()
 				print(block_info)
 				await self._write_block_db(block_info)
-				# print(await self._get_max_current_mini_epoch())
-				time.sleep(10)
+				time.sleep(5)
 		except Exception as ex:
 			print('run block worker job error: ',  ex)
 

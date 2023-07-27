@@ -1,16 +1,18 @@
 import asyncio
-# from query_modules_2.get_nodes_info import get_nodes_info
 from query_modules_2.get_nodes_urls import get_nodes_urls
 from query_modules_2.call_url import call_url
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.base import Node, Records, User, NodesUsers
+# from db.base import  Records, User, NodesUsers, Node
+from models.models import Node, Records, User, NodesUsers, Blocks
+# from models.block import Blocks
+
 from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import lazyload, joinedload
 from sqlalchemy import func
-from db import async_session
+from db.engine import async_session
 import time
 from commands.sending_warnings_to_users import sending_warnings_to_users
 from config.zilliqa import *
@@ -24,7 +26,7 @@ class Worker():
 	async def run(self):
 		while True:
 			await self._write_or_update_node_to_db()
-			await self._checking_the_operation_of_node()
+			# await self._checking_the_operation_of_node()
 
 	async def _delete_user_from_user_nodes(self, node_name, tg_user_id):
 		async with self._async_session() as session:
@@ -193,10 +195,10 @@ class Worker():
 			return last_rating
 
 	async def _get_rating(self, node_name, last_score_from_db):
-			ratings_number = await self._get_ratings_number(node_name)
-			maximum_score = MAX_POINTS_PER_ASSESSMENT * ratings_number
-			rating = (last_score_from_db / maximum_score) * 100
-			return rating
+		ratings_number = await self._get_ratings_number(node_name)
+		maximum_score = MAX_POINTS_PER_ASSESSMENT * ratings_number
+		rating = (last_score_from_db / maximum_score) * 100
+		return rating
 
 	async def _create_new_node(self, node_args):
 		new_node = Node(
@@ -255,7 +257,6 @@ class Worker():
 					'node_url': node_url[0],
 					'node_name' : node_name
 				}
-
 				record_args = {
 					'current_ds_epoch': current_ds_epoch,
 					'current_mini_epoch': current_mini_epoch,

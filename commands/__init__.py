@@ -7,12 +7,12 @@ from commands.help import help_comand, help_func
 from commands.nodes_buttons import get_nodes_buttons
 from aiogram import F
 from midelwares import RegisterCheck
-from .sent_nodes_info import sent_nodes_info
+from callbacks.sent_nodes_info import sent_nodes_info
 from .get_nodes_list import get_nodes_list
-from .subscribe import subscribe
-from .cancel_subscription import cancel_subscription
-from .my_nodes import my_nodes
-from .callbacks import SubscribeCallback, CancelSubscriptionCallback, MyNodesCallback
+from callbacks.subscribe import subscribe
+from callbacks.cancel_subscription import cancel_subscription
+from callbacks.my_nodes import my_nodes
+from callbacks.callbacks import SubscribeCallback, CancelSubscriptionCallback, MyNodesCallback
 
 async def register_user_comands(router: Router):
 	# router.message.register(start, Command(commands=['start'])) - another variant

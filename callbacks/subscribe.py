@@ -1,5 +1,5 @@
 from aiogram import types
-from db import async_session
+from db.engine import async_session
 from worker.worker_db import Worker
 from .callbacks import SubscribeCallback
 

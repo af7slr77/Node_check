@@ -2,11 +2,10 @@ import asyncio
 from typing import Callable, Dict, Any, Awaitable, Union
 from aiogram import BaseMiddleware
 from aiogram.types import Message, CallbackQuery
-from db import async_session
-from db.base import Node, User
+from db.engine import async_session
+from models.models import Node, User
 from sqlalchemy import select
 from sqlalchemy.orm import lazyload, joinedload
-from db import async_session
 from datetime import datetime
 
 class RegisterCheck(BaseMiddleware):

@@ -1,5 +1,5 @@
 from worker.worker_db import Worker
-from db import async_session
+from db.engine import async_session
 import asyncio
 
 async def get_nodes_list():

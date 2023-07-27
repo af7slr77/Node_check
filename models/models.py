@@ -1,11 +1,11 @@
-import sqlalchemy as db
-from sqlalchemy.ext.declarative import declarative_base
+# from db.base import BaseModel
 from sqlalchemy import Column, Integer, String, ForeignKey, VARCHAR, Table
 from sqlalchemy.orm import relationship, lazyload
 from datetime import datetime
-from query_modules.get_nodes_urls import get_nodes_urls
-BaseModel = declarative_base()
+# from query_modules.get_nodes_urls import get_nodes_urls
+from sqlalchemy.ext.declarative import declarative_base
 
+BaseModel = declarative_base()
 
 class NodesUsers(BaseModel):
 	__tablename__ = "nodes_users"
@@ -24,7 +24,7 @@ class Node(BaseModel):
 	node_url = Column(String, unique=True, nullable=False)
 	node_name = Column(String, nullable=False)
 	nodes_users = relationship("User", secondary='nodes_users', backref='nodes', lazy='selectin', )
-	records = relationship('Records', backref='node', lazy=True)
+	records = relationship('Records', backref='nodes', lazy='selectin')
 	
 	def __repr__(self):
 		return f'{self.node_id, self.node_url, self.node_name}'
@@ -37,8 +37,7 @@ class User(BaseModel):
 	username = Column(VARCHAR(32), unique=True, nullable=False)
 	reg_date = Column(Integer, nullable=False)
 	users_nodes = relationship('Node', secondary='nodes_users', backref='users', lazy='selectin', viewonly=True )
-	
-	# nodes = relationship('Node', secondary='users_nodes_', back_populates='users', lazy=True)
+	# nodes = relationship('Node', secondary='users_nodes', back_populates='users', lazy='selectin')
 
 	def __repr__(self):
 		return f'{self.user_id, self.user_telegram_id, self.username, self.reg_date}'
