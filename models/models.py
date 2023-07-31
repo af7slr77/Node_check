@@ -1,5 +1,5 @@
 # from db.base import BaseModel
-from sqlalchemy import Column, Integer, String, ForeignKey, VARCHAR, Table
+from sqlalchemy import Column, Integer, String, ForeignKey, VARCHAR, Table, BIGINT
 from sqlalchemy.orm import relationship, lazyload
 from datetime import datetime
 # from query_modules.get_nodes_urls import get_nodes_urls
@@ -37,7 +37,6 @@ class User(BaseModel):
 	username = Column(VARCHAR(32), unique=True, nullable=False)
 	reg_date = Column(Integer, nullable=False)
 	users_nodes = relationship('Node', secondary='nodes_users', backref='users', lazy='selectin', viewonly=True )
-	# nodes = relationship('Node', secondary='users_nodes', back_populates='users', lazy='selectin')
 
 	def __repr__(self):
 		return f'{self.user_id, self.user_telegram_id, self.username, self.reg_date}'
@@ -53,9 +52,14 @@ class Records(BaseModel):
 	current_mini_epoch = Column(Integer)
 	response_time = Column(Integer)
 	rating = Column(Integer)
+	stake_amount = Column(String)
+	reward = Column(String)
+	commission = Column(String)
+	number_of_delegates = Column(Integer)
 
 	def __repr__(self):
 		return f"{self.record_id, self.score, self.update_time, self.node_id, self.current_ds_epoch, self.current_mini_epoch, self.response_time}"
+
 	
 class Blocks(BaseModel):
 	__tablename__ = 'blocks'

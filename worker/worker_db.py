@@ -1,5 +1,5 @@
 import asyncio
-from query_modules_2.get_nodes_urls import get_nodes_urls
+from query_modules_2.get_nodes_data import get_total_info
 from query_modules_2.call_url import call_url
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker
@@ -214,7 +214,11 @@ class Worker():
 			current_mini_epoch = record_args['current_mini_epoch'],
 			response_time = record_args['response_time'],
 			score = record_args['score'],
-			rating = record_args['rating']
+			rating = record_args['rating'],
+			stake_amount = record_args['stake_amount'],
+			commission = record_args['commission'],
+			reward = record_args['reward'],
+			number_of_delegates = record_args['number_of_delegates']#
 			)
 		return new_record
 
@@ -231,20 +235,36 @@ class Worker():
 			current_ds_epoch = node_from_responce['current_ds_epoch']
 			current_mini_epoch = node_from_responce['current_mini_epoch']
 			response_time = node_from_responce['response_time']
+			stake_amount = node_from_responce['stake_amount']
+			commission = node_from_responce['commission']
+			reward = node_from_responce['reward']
+			number_of_delegates = node_from_responce['number_of_delegates']
 			node_db = await self._get_one_node_from_db(node_name)
 			if node_db is not None:
 				try:
-					max_mini_epoch = int(await self._get_max_current_mini_epoch())
-					last_score_from_db = int(await self._get_last_node_score(node_db))
-					current_responce_score = await self._current_score(current_mini_epoch, response_time, max_mini_epoch)
-					score = await self._get_new_score(last_score_from_db, current_responce_score)
+					max_mini_epoch = await self._get_max_current_mini_epoch()
+					last_score_from_db = await self._get_last_node_score(node_db)
+					current_responce_score = await self._current_score(
+						current_mini_epoch,
+						response_time,
+						max_mini_epoch
+						)
+					score = await self._get_new_score(
+						last_score_from_db, 
+						current_responce_score
+						)
 					rating = round(await self._get_rating(node_name, last_score_from_db))
 					record_args = {
 						'current_ds_epoch': current_ds_epoch,
 						'current_mini_epoch': current_mini_epoch,
 						'response_time': response_time,
 						'score': score,
-						'rating': rating
+						'rating': rating,
+						'stake_amount': stake_amount,
+						'commission': commission,
+						'reward': reward,
+						'number_of_delegates': number_of_delegates
+
 					}
 					new_record = await self._create_new_record(record_args)
 					node_db.records.append(new_record)
@@ -262,7 +282,11 @@ class Worker():
 					'current_mini_epoch': current_mini_epoch,
 					'response_time': response_time,
 					'score': 0,
-					'rating':0
+					'rating': 0,
+					'stake_amount': 0,
+					'commission': 0,
+					'reward': 0,
+					'number_of_delegates': 0
 				}
 				new_node = await self._create_new_node(node_args)
 				new_record = await self._create_new_record(record_args)
@@ -273,11 +297,13 @@ class Worker():
 
 	async def _write_or_update_node_to_db(self):
 		try:
-			urls = get_nodes_urls()
-			for url in urls:
-				responce = call_url(url['node_url'], url['name'])
-				print(responce)
-				await self._write_node_db(responce)
+			data = get_total_info()
+			for elem in data:
+				responce = call_url(elem['node_url'])
+				elem['current_ds_epoch'] = responce['current_ds_epoch']
+				elem['current_mini_epoch'] = responce['current_mini_epoch']
+				elem['response_time'] = responce['response_time']
+				await self._write_node_db(elem)
 				time.sleep(PAUSE_BETWEEN_REQUESTS)
 		except Exception as ex:
 			print('write_or_update_node_to_db: ', ex)

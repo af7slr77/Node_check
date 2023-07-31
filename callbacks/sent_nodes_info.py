@@ -13,10 +13,14 @@ async def sent_nodes_info(call: types.CallbackQuery):
 	node_records =  node.records[-1]
 	fromtimestamp = datetime.fromtimestamp(node_records.update_time)
 	update_time = fromtimestamp.strftime('%d-%m-%Y %H:%M:%S')
+	stake_amount = round(int(node_records.stake_amount) / 10 ** 12, 3)
+	commission = int(node_records.commission) / 10 ** 7
+	reward = round(int(node_records.reward) / 10 ** 12, 3)
+	number_of_delegates =  node_records.number_of_delegates
 	subscribe_kb = InlineKeyboardBuilder()
 	subscribe_kb.row(
 		InlineKeyboardButton(text='Subscribe', callback_data = SubscribeCallback(node_name=node_name, action='subscribe').pack()),
 		InlineKeyboardButton(text='Cancel Subscription',  callback_data=CancelSubscriptionCallback(node_name= node_name, action='cancel_subscription').pack()))
 	subscribe_kb.row(InlineKeyboardButton(text='My nodes',  callback_data=MyNodesCallback(node_name=node_name, action='my_nodes').pack()))
-	msg = f"{node.node_name}:\n" "\n" f"URL:  {node.node_url}\n" "\n" f"Rating:  {node_records.rating}%\n" "\n" f"Current ds epoch:  {node_records.current_ds_epoch}\n" "\n" f"Current mini epoch:  {node_records.current_mini_epoch}\n" "\n" f"Last update:  {update_time}\n"
+	msg = f"{node.node_name}:\n""\n" f"URL:  {node.node_url}\n""\n" f"Rating:  {node_records.rating}%\n""\n" f"Stake amount:  {stake_amount}\n" "\n" f"Commission:  {commission}%\n" "\n" f"Delegates:  {number_of_delegates}\n" "\n" f"Reward:  {reward}\n" "\n"  f"Current ds epoch:  {node_records.current_ds_epoch}\n""\n" f"Current mini epoch:  {node_records.current_mini_epoch}\n""\n" f"Last update:  {update_time}\n"
 	await call.message.answer(text=msg, reply_markup=subscribe_kb.as_markup())
