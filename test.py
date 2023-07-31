@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 async def bot():
 	engine = create_async_engine('sqlite+aiosqlite:///database.db')
 	async_session = async_sessionmaker(engine)
-	logging.basicConfig(level=logging.INFO)
+	logging.basicConfig(level=logging.DEBUG)
 	#Gen commands menu
 	comands_for_bot = []
 	for cmd in bot_commands:

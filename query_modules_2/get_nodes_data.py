@@ -27,7 +27,6 @@ def get_nodes_urls():
 			'node_name': node_name.lower(), 
 			'stake_amount': stake_amount,
 			'commission': commission,
-			'reward':reward,
 			'node_address': node_address
 			})
 	return urls

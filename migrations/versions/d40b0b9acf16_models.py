@@ -1,8 +1,8 @@
 """models
 
-Revision ID: 8138523e6f8a
+Revision ID: d40b0b9acf16
 Revises: 
-Create Date: 2023-07-31 13:55:30.348607
+Create Date: 2023-07-31 16:34:32.266149
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '8138523e6f8a'
+revision = 'd40b0b9acf16'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -62,7 +62,6 @@ def upgrade() -> None:
     sa.Column('response_time', sa.Integer(), nullable=True),
     sa.Column('rating', sa.Integer(), nullable=True),
     sa.Column('stake_amount', sa.String(), nullable=True),
-    sa.Column('reward', sa.String(), nullable=True),
     sa.Column('commission', sa.String(), nullable=True),
     sa.Column('number_of_delegates', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['node_id'], ['nodes.node_id'], ),

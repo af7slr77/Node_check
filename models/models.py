@@ -53,7 +53,6 @@ class Records(BaseModel):
 	response_time = Column(Integer)
 	rating = Column(Integer)
 	stake_amount = Column(String)
-	reward = Column(String)
 	commission = Column(String)
 	number_of_delegates = Column(Integer)
 

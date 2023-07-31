@@ -217,7 +217,6 @@ class Worker():
 			rating = record_args['rating'],
 			stake_amount = record_args['stake_amount'],
 			commission = record_args['commission'],
-			reward = record_args['reward'],
 			number_of_delegates = record_args['number_of_delegates']#
 			)
 		return new_record
@@ -237,7 +236,6 @@ class Worker():
 			response_time = node_from_responce['response_time']
 			stake_amount = node_from_responce['stake_amount']
 			commission = node_from_responce['commission']
-			reward = node_from_responce['reward']
 			number_of_delegates = node_from_responce['number_of_delegates']
 			node_db = await self._get_one_node_from_db(node_name)
 			if node_db is not None:
@@ -262,7 +260,6 @@ class Worker():
 						'rating': rating,
 						'stake_amount': stake_amount,
 						'commission': commission,
-						'reward': reward,
 						'number_of_delegates': number_of_delegates
 
 					}
@@ -285,7 +282,6 @@ class Worker():
 					'rating': 0,
 					'stake_amount': 0,
 					'commission': 0,
-					'reward': 0,
 					'number_of_delegates': 0
 				}
 				new_node = await self._create_new_node(node_args)
