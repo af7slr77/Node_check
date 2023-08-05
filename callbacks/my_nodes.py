@@ -2,7 +2,6 @@ from aiogram import types
 from db.engine import async_session
 from worker.worker_db import Worker
 from .callbacks import MyNodesCallback
-from .callbacks import SubscribeCallback, CancelSubscriptionCallback, MyNodesCallback
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup, InlineKeyboardButton
 
 async def my_nodes(call: types.CallbackQuery, callback_data: MyNodesCallback):

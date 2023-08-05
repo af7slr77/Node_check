@@ -2,6 +2,12 @@ import requests
 import json
 from config.zilliqa import MAIN_NODE, MAX_NODE_TIMEOUT_SECOND
 from time import time
+import logging
+from logs.logs import init_block_logger
+
+# init_block_logger(name)
+get_blocks_logger = logging.getLogger('block.block_worker.get_blocks')
+
 
 def get_blocks():
 	params = json.dumps( {
@@ -24,7 +30,11 @@ def get_blocks():
 			'response_time': responce_time
 		}
 		return blocks
-	except Exception:
+	except Exception as ex:
+		args = {
+			'line': 37
+		}
+		get_blocks_logger.warning(ex, extra=args)
 		blocks = {
 			'current_ds_epoch': None,
 			'current_mini_epoch': None,

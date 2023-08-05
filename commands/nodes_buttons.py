@@ -1,6 +1,5 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram import types
-from query_modules.get_nodes_urls import get_nodes_urls
 from .get_nodes_list import get_nodes_list
 import asyncio
 

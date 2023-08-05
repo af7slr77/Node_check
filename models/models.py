@@ -1,8 +1,6 @@
-# from db.base import BaseModel
 from sqlalchemy import Column, Integer, String, ForeignKey, VARCHAR, Table, BIGINT
 from sqlalchemy.orm import relationship, lazyload
 from datetime import datetime
-# from query_modules.get_nodes_urls import get_nodes_urls
 from sqlalchemy.ext.declarative import declarative_base
 
 BaseModel = declarative_base()

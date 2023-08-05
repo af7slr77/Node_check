@@ -1,13 +1,7 @@
 import asyncio
-from query_modules_2.get_nodes_data import get_total_info
-from query_modules_2.call_url import call_url
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.ext.asyncio import async_sessionmaker
-from sqlalchemy.ext.asyncio import AsyncSession
-# from db.base import  Records, User, NodesUsers, Node
+from requests_module.get_nodes_data import get_total_info
+from requests_module.call_url import call_url
 from models.models import Node, Records, User, NodesUsers, Blocks
-# from models.block import Blocks
-
 from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import lazyload, joinedload
@@ -17,6 +11,10 @@ import time
 from commands.sending_warnings_to_users import sending_warnings_to_users
 from config.zilliqa import *
 from block_worker.blocks_db import BlocksWorker
+import logging
+
+# logging.basicConfig(level=logging.INFO)
+
 
 class Worker():
 
@@ -26,7 +24,7 @@ class Worker():
 	async def run(self):
 		while True:
 			await self._write_or_update_node_to_db()
-			# await self._checking_the_operation_of_node()
+			await self._checking_the_operation_of_node()
 
 	async def _delete_user_from_user_nodes(self, node_name, tg_user_id):
 		async with self._async_session() as session:
@@ -261,14 +259,13 @@ class Worker():
 						'stake_amount': stake_amount,
 						'commission': commission,
 						'number_of_delegates': number_of_delegates
-
 					}
 					new_record = await self._create_new_record(record_args)
 					node_db.records.append(new_record)
 					session.add(new_record)
 					await session.commit()
 				except Exception as ex:
-					print(ex)
+					logging.warning(msg=ex)
 			else:
 				node_args = {
 					'node_url': node_url[0],
@@ -302,7 +299,7 @@ class Worker():
 				await self._write_node_db(elem)
 				time.sleep(PAUSE_BETWEEN_REQUESTS)
 		except Exception as ex:
-			print('write_or_update_node_to_db: ', ex)
+			logging.warning(msg=ex)
 
 if __name__ == '__main__':
 	worker = Worker(async_session)

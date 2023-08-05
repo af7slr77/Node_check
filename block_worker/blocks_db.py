@@ -1,6 +1,5 @@
 import asyncio
 from .get_blocks import get_blocks
-# from db.base import Node, Records, User, NodesUsers, Blocks
 from models.models import Blocks
 from datetime import datetime
 from sqlalchemy import select
@@ -9,7 +8,11 @@ from sqlalchemy import func
 from db.engine import async_session
 import time
 from config import MAX_DIFFERENCE_OF_BLOCKS, MIN_DIFFERENCE_OF_BLOCKS, MAX_RESPONSE_SECONDS, MIN_RESPONSE_SECONDS, AVERAGE_RESPONSE_SECONDS
+import logging
+from logs.logs import init_block_logger
 
+init_block_logger('block')
+blocks_logger = logging.getLogger('block.block_worker.block_db')
 
 class BlocksWorker():
 
@@ -20,11 +23,13 @@ class BlocksWorker():
 		try:
 			while True:
 				block_info = get_blocks()
-				print(block_info)
 				await self._write_block_db(block_info)
 				time.sleep(5)
 		except Exception as ex:
-			print('run block worker job error: ',  ex)
+			line = {
+				'line':35
+				}
+			blocks_logger.warning(msg=ex, extra=line)
 
 
 	async def _get_max_curent_ds_epoch(self):
@@ -60,8 +65,12 @@ class BlocksWorker():
 			}
 			new_block = await self._create_new_blocks_record(block_args)
 			session.add(new_block)
-			print('block is recorded')
+			line = {
+				'line':70
+				}
+			blocks_logger.debug('block is recorded', extra=line)
 			await session.commit()
+
 if __name__ == '__main__':
 	block = BlocksWorker(async_session)
 	asyncio.run(block.run())
