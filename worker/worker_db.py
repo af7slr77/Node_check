@@ -6,7 +6,7 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import lazyload, joinedload
 from sqlalchemy import func
-from db.engine import async_session
+from db.engine import get_async_session
 import time
 from commands.sending_warnings_to_users import sending_warnings_to_users
 from config.zilliqa import *
@@ -277,8 +277,8 @@ class Worker():
 					'response_time': response_time,
 					'score': 0,
 					'rating': 0,
-					'stake_amount': 0,
-					'commission': 0,
+					'stake_amount': '0',
+					'commission': '0',
 					'number_of_delegates': 0
 				}
 				new_node = await self._create_new_node(node_args)
@@ -302,5 +302,7 @@ class Worker():
 			logging.warning(msg=ex)
 
 if __name__ == '__main__':
+	async_session = asyncio.run(get_async_session())
+	print(type(async_session)) 
 	worker = Worker(async_session)
 	asyncio.run(worker.run())

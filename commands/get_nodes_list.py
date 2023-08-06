@@ -1,8 +1,9 @@
 from worker.worker_db import Worker
-from db.engine import async_session
+from db.engine import get_async_session
 import asyncio
 
 async def get_nodes_list():
+    async_session = await get_async_session()
     worker = Worker(async_session)
     data = await worker._buttons()
     new_nodes_list = []

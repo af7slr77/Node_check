@@ -22,8 +22,8 @@ def get_blocks():
 		result = requests.post(MAIN_NODE, data=params, headers=headers, timeout = MAX_NODE_TIMEOUT_SECOND).json()
 		stop = time()
 		responce_time = stop - start
-		current_ds_epoch = result['result']['CurrentDSEpoch']
-		current_mini_epoch = result['result']['CurrentMiniEpoch']
+		current_ds_epoch = int(result['result']['CurrentDSEpoch'])
+		current_mini_epoch = int(result['result']['CurrentMiniEpoch'])
 		blocks = {
 			'current_ds_epoch': current_ds_epoch,
 			'current_mini_epoch': current_mini_epoch,

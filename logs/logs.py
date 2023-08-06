@@ -3,11 +3,11 @@ import logging
 def init_worker_logger(name):
     logger = logging.getLogger(name)
     FORMAT = '%(asctime)s - %(name)s :: %(line)s - %(levelname)s - %(message)s'
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     sh = logging.StreamHandler()
     sh.setFormatter(logging.Formatter(FORMAT))
-    sh.setLevel(logging.DEBUG)
-    fh = logging.FileHandler('/tmp/test.log')
+    sh.setLevel(logging.INFO)
+    fh = logging.FileHandler('/tmp/worker.log')
     fh.setFormatter(logging.Formatter(FORMAT))
     fh.setLevel(logging.WARNING)
     logger.addHandler(sh)
@@ -22,7 +22,7 @@ def init_block_logger(name):
     sh.setLevel(logging.DEBUG)
     fh = logging.FileHandler('/tmp/blocks.log')
     fh.setFormatter(logging.Formatter(FORMAT))
-    fh.setLevel(logging.DEBUG)
+    fh.setLevel(logging.WARNING)
     logger.addHandler(sh)
     logger.addHandler(fh)
 

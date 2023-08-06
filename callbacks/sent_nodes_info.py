@@ -1,5 +1,5 @@
 from aiogram import types
-from db.engine import async_session
+from db.engine import get_async_session
 from worker.worker_db import Worker
 from datetime import datetime
 from .callbacks import SubscribeCallback, CancelSubscriptionCallback, MyNodesCallback
@@ -15,6 +15,7 @@ async def check_current_ds_and_min_epoch(current_mini_epoch, current_ds_epoch):
 		return current_mini_epoch, current_ds_epoch
 		
 async def sent_nodes_info(call: types.CallbackQuery):
+	async_session = await get_async_session()
 	node_name = call.data
 	node_data = Worker(async_session)
 	node = await node_data._get_one_node_from_db(node_name)

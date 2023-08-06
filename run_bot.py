@@ -5,13 +5,14 @@ import os
 from commands import register_user_comands
 from commands.bot_commands import bot_commands
 from aiogram.types import BotCommand
-from db.engine import async_session
+from db.engine import get_async_session
 from logs.logs import init_bot_logger
 
 init_bot_logger('bot')
 blocks_logger = logging.getLogger('bot.run_bot')
 
 async def bot():
+	async_session = await get_async_session()
 	#Gen commands menu
 	comands_for_bot = []
 	for cmd in bot_commands:

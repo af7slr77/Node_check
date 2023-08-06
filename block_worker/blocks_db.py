@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import lazyload, joinedload
 from sqlalchemy import func
-from db.engine import async_session
+from db.engine import get_async_session
 import time
 from config import MAX_DIFFERENCE_OF_BLOCKS, MIN_DIFFERENCE_OF_BLOCKS, MAX_RESPONSE_SECONDS, MIN_RESPONSE_SECONDS, AVERAGE_RESPONSE_SECONDS
 import logging
@@ -13,6 +13,7 @@ from logs.logs import init_block_logger
 
 init_block_logger('block')
 blocks_logger = logging.getLogger('block.block_worker.block_db')
+
 
 class BlocksWorker():
 
@@ -72,5 +73,6 @@ class BlocksWorker():
 			await session.commit()
 
 if __name__ == '__main__':
+	async_session = asyncio.run(get_async_session())
 	block = BlocksWorker(async_session)
 	asyncio.run(block.run())

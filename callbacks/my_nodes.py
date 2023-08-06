@@ -1,10 +1,11 @@
 from aiogram import types
-from db.engine import async_session
+from db.engine import get_async_session
 from worker.worker_db import Worker
 from .callbacks import MyNodesCallback
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup, InlineKeyboardButton
 
 async def my_nodes(call: types.CallbackQuery, callback_data: MyNodesCallback):
+	async_session = await get_async_session()
 	node_name = callback_data.node_name
 	tg_user_id = call.from_user.id
 	worker = Worker(async_session)
