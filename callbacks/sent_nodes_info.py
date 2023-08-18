@@ -20,7 +20,7 @@ async def sent_nodes_info(call: types.CallbackQuery):
 	node_data = Worker(async_session)
 	node = await node_data._get_one_node_from_db(node_name)
 	node_records =  node.records[-1]
-	last_update = "{:,.0f}".format(int(time() - node_records.update_time)) 
+	last_update = "{:,.0f}".format(int(time() - node_records.update_time)/ 10 ** 3) 
 	stake_amount = "{:,.2f}".format(int(node_records.stake_amount) / 10 ** 12)
 	commission = "{:,.1f}".format(int(node_records.commission) / 10 ** 7) 
 	number_of_delegates = "{:,.0f}".format(round(int(node_records.number_of_delegates)))

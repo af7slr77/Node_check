@@ -7,7 +7,7 @@ from sqlalchemy.orm import lazyload, joinedload
 from sqlalchemy import func
 from db.engine import get_async_session
 import time
-from config import MAX_DIFFERENCE_OF_BLOCKS, MIN_DIFFERENCE_OF_BLOCKS, MAX_RESPONSE_SECONDS, MIN_RESPONSE_SECONDS, AVERAGE_RESPONSE_SECONDS
+from config.zilliqa import *
 import logging
 from logs.logs import init_block_logger
 

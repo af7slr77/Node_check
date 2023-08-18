@@ -29,6 +29,7 @@ def get_blocks():
 			'current_mini_epoch': current_mini_epoch,
 			'response_time': responce_time
 		}
+		print(blocks)
 		return blocks
 	except Exception as ex:
 		args = {

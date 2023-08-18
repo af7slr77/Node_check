@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, VARCHAR, Table, BIGI
 from sqlalchemy.orm import relationship, lazyload
 from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
+from config.zilliqa import TRUST_COEFFICIENT
 
 BaseModel = declarative_base()
 
@@ -23,7 +24,7 @@ class Node(BaseModel):
 	node_name = Column(String, nullable=False)
 	nodes_users = relationship("User", secondary='nodes_users', backref='nodes', lazy='selectin', )
 	records = relationship('Records', backref='nodes', lazy='selectin')
-	
+	trust_coefficient = Column(Integer, default=TRUST_COEFFICIENT, nullable=False)
 	def __repr__(self):
 		return f'{self.node_id, self.node_url, self.node_name}'
 
@@ -33,7 +34,7 @@ class User(BaseModel):
 	user_id = Column(Integer, unique=True, nullable=False,  primary_key=True)
 	user_telegram_id = Column(Integer, unique=True, nullable=False)
 	username = Column(VARCHAR(32), unique=True, nullable=False)
-	reg_date = Column(Integer, nullable=False)
+	reg_date = Column(Integer, default=50, nullable=False)
 	users_nodes = relationship('Node', secondary='nodes_users', backref='users', lazy='selectin', viewonly=True )
 
 	def __repr__(self):
@@ -43,7 +44,6 @@ class Records(BaseModel):
 	__tablename__ = 'records'
 
 	record_id = Column(Integer, unique=True,  primary_key=True)
-	score = Column(Integer)
 	update_time = Column(Integer, nullable=False)
 	node_id = Column(Integer, ForeignKey('nodes.node_id'))
 	current_ds_epoch = Column(Integer)

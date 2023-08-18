@@ -8,13 +8,15 @@ from sqlalchemy.orm import lazyload, joinedload
 from sqlalchemy import func
 from db.engine import get_async_session
 import time
-from commands.sending_warnings_to_users import sending_warnings_to_users
+from commands.sending_warnings_to_users import send_inactive_node_notifications, send_missed_blocks_notifications
 from config.zilliqa import *
 from block_worker.blocks_db import BlocksWorker
+from logs.logs import init_worker_logger
 import logging
 
 # logging.basicConfig(level=logging.INFO)
-
+init_worker_logger('worker')
+worker_logger = logging.getLogger('worker.worker_db')
 
 class Worker():
 
@@ -24,7 +26,14 @@ class Worker():
 	async def run(self):
 		while True:
 			await self._write_or_update_node_to_db()
-			await self._checking_the_operation_of_node()
+			# await self._checking_the_operation_of_node()
+			# time.sleep(10)
+
+	async def _get_last_records(self):
+		async with self._async_session() as session:
+			records_query = await session.execute(select(Records))
+			last_records = records_query.unique().all()
+			print(last_records[-28:])
 
 	async def _delete_user_from_user_nodes(self, node_name, tg_user_id):
 		async with self._async_session() as session:
@@ -48,45 +57,72 @@ class Worker():
 		max_current_mini_epoch = await blocks_worker._get_max_current_mini_epoch()
 		return max_current_mini_epoch
 
-	async def _sending_warnings(self, nodes_users, args):
-		for user in nodes_users:
-			user_telegram_id = user.user_telegram_id
-			if user_telegram_id:
-				await sending_warnings_to_users(user_telegram_id, args)
-			else:
-				pass
-
-	async def _searching_for_empty_values_and_delays(self, node, max_mini_epoch):
-		node_name = node[0].node_name
-		last_record = node[0].records[-1]
-		current_ds_epoch = last_record.current_ds_epoch
-		current_mini_epoch = last_record.current_mini_epoch
-		nodes_users = node[0].nodes_users
-		if current_ds_epoch == None:
-			args = {
-				'node_name': node_name,
-				'current_ds_epoch': current_ds_epoch
-			}
-			await self._sending_warnings(nodes_users, args)
-		else:
-			if current_mini_epoch < max_mini_epoch - MAX_DIFFERENCE_OF_BLOCKS:
-				mini_epoch_diff = max_mini_epoch - current_mini_epoch
-				args = {
-					'node_name': node_name,
-					'current_ds_epoch': current_ds_epoch,
-					'mini_epoch_diff': mini_epoch_diff
-				}
-				await self._sending_warnings(nodes_users, args)			
-
-	async def _checking_the_operation_of_node(self):
+	async def _sending_warnings(self, nodes_users, node_name, missed_blocks):
 		try:
-			async with self._async_session() as session:
-				max_mini_epoch = await self._get_max_current_mini_epoch()
-				all_nodes =  await self._get_all_nodes_from_db()
-				for node in all_nodes:
-					await self._searching_for_empty_values_and_delays(node, max_mini_epoch)
+			if missed_blocks is not None:
+				for user in nodes_users:
+					user_telegram_id = user.user_telegram_id
+					if user_telegram_id:
+						await send_missed_blocks_notifications(user_telegram_id, node_name, missed_blocks)
+					else:
+						pass
+			else:
+				for user in nodes_users:
+					user_telegram_id = user.user_telegram_id
+					if user_telegram_id:
+						await send_inactive_node_notifications(user_telegram_id, node_name)
 		except Exception as ex:
-			print('checking_the_operation_of_node: ', ex)
+			worker_logger.debug(ex)
+
+	# async def _searching_for_empty_values_and_delays(self, node, max_mini_epoch):
+	# 	node_name = node[0].node_name
+	# 	current_ds_epoch = last_record.current_ds_epoch
+	# 	current_mini_epoch = last_record.current_mini_epoch
+	# 	nodes_users = node[0].nodes_users
+	# 	if current_ds_epoch == None:
+	# 		args = {
+	# 			'node_name': node_name,
+	# 			'current_ds_epoch': current_ds_epoch
+	# 		}
+	# 		await self._sending_warnings(nodes_users, args)
+	# 	else:
+	# 		if current_mini_epoch < max_mini_epoch - MAX_DIFFERENCE_OF_BLOCKS:
+	# 			mini_epoch_diff = max_mini_epoch - current_mini_epoch
+	# 			args = {
+	# 				'node_name': node_name,
+	# 				'current_ds_epoch': current_ds_epoch,
+	# 				'mini_epoch_diff': mini_epoch_diff
+	# 			}
+	# 			await self._sending_warnings(nodes_users, args)			
+
+	async def _checking_the_operation_of_node(self, node, missed_blocks):
+		nodes_users = node.nodes_users
+		node_name = node.node_name
+		try:
+			if missed_blocks is not None:
+				
+				if missed_blocks >= MIN_DIFFERENCE_OF_BLOCKS:
+					for user in nodes_users:
+						user_telegram_id = user.user_telegram_id
+						if user_telegram_id:
+							await send_missed_blocks_notifications(
+								user_telegram_id,
+								node_name,
+								missed_blocks
+							)
+						else:
+							pass
+			else:
+				for user in nodes_users:
+					user_telegram_id = user.user_telegram_id
+					if user_telegram_id:
+						await send_inactive_node_notifications(
+							user_telegram_id, 
+							node_name
+						)
+		except Exception as ex:
+			# print('checking_the_operation_of_node: ', ex)
+			worker_logger.debug(ex)
 
 	async def _buttons(self):
 		async with self._async_session() as session:
@@ -145,58 +181,10 @@ class Worker():
 				session.add(node)
 				await session.commit()
 			except Exception as ex:
-				print('worker.subscribe ', ex)
-
-	async def _response_time_score(self, response_time):
-		if response_time > AVERAGE_RESPONSE_SECONDS and response_time < MAX_RESPONSE_SECONDS:
-			response_time_score = MIN_RESPONSE_TIME_SCORE
-			return response_time_score
-		elif response_time > MIN_RESPONSE_SECONDS and response_time < AVERAGE_RESPONSE_SECONDS:
-			response_time_score = AVERAGE_RESPONSE_TIME_SCORE
-			return response_time_score
-		elif response_time < MIN_RESPONSE_SECONDS:
-			response_time_score = MAX_RESPONSE_TIME_SCORE
-			return response_time_score
-
-	async def _current_mini_epoch_score(self, current_mini_epoch, max_mini_epoch):
-		if current_mini_epoch >= max_mini_epoch - MIN_DIFFERENCE_OF_BLOCKS:
-				mini_epoch_score = POSITIVE_MINI_EPOCH_SCORE
-				return mini_epoch_score
-		elif current_mini_epoch < max_mini_epoch - MAX_DIFFERENCE_OF_BLOCKS:
-			mini_epoch_score = AVERAGE_NEGATIVE_TOTAL_SCORE
-			return mini_epoch_score
-
-	async def _current_score(self, current_mini_epoch, response_time, max_mini_epoch):
-		mini_epoch_score = None
-		response_time_score = None
-		total_score = None
-		if current_mini_epoch is not None and response_time is not None and max_mini_epoch is not None:
-			current_mini_epoch_score = await self._current_mini_epoch_score(current_mini_epoch, max_mini_epoch)
-			response_time_score = await self._response_time_score(response_time)
-			return current_mini_epoch_score + response_time_score
-		else: 
-			return MAX_NEGATIVE_TOTAL_SCORE
-
-	async def _get_last_node_score(self, node):
-		async with self._async_session() as session:
-			node_id = node.node_id
-			last_rating_query = await session.execute(select(Records).filter_by(node_id=node_id).order_by(Records.record_id.desc()))
-			last_rating = last_rating_query.first()[0].score
-			return last_rating
-	
-	async def _get_ratings_number(self, node_name):
-		async with self._async_session() as session:
-			node = await self._get_one_node_from_db(node_name)
-			node_id = node.node_id
-			ratings_number_query = await session.execute(select(Records).filter_by(node_id=node_id))
-			last_rating = len(ratings_number_query.fetchall())
-			return last_rating
-
-	async def _get_rating(self, node_name, last_score_from_db):
-		ratings_number = await self._get_ratings_number(node_name)
-		maximum_score = MAX_POINTS_PER_ASSESSMENT * ratings_number
-		rating = (last_score_from_db / maximum_score) * 100
-		return rating
+				line = {
+					'line':158
+			}
+				worker_logger.warning(msg=ex, extra=line)
 
 	async def _create_new_node(self, node_args):
 		new_node = Node(
@@ -211,7 +199,6 @@ class Worker():
 			current_ds_epoch = record_args['current_ds_epoch'],
 			current_mini_epoch = record_args['current_mini_epoch'],
 			response_time = record_args['response_time'],
-			score = record_args['score'],
 			rating = record_args['rating'],
 			stake_amount = record_args['stake_amount'],
 			commission = record_args['commission'],
@@ -219,11 +206,51 @@ class Worker():
 			)
 		return new_record
 
-	async def _get_new_score(self, last_score_from_db, current_responce_score):
-		new_score = last_score_from_db + current_responce_score
-		if new_score <= 0:
-			return 0
-		return new_score
+	async def _get_missed_blocks(self, current_mini_epoch):
+		max_mini_epoch = await self._get_max_current_mini_epoch()
+		if current_mini_epoch is None:
+			return None
+		missed_blocks_count = max_mini_epoch - current_mini_epoch
+		return missed_blocks_count
+
+	async def is_negative(self, missed_blocks):
+
+		if missed_blocks is not None:
+			if missed_blocks < 0:
+				return 0
+			else:
+				return missed_blocks
+		return missed_blocks
+
+	async def _calculate_entity_score(self, http_response_time, missed_blocks):
+		try:
+			missed_blocks = await self.is_negative(missed_blocks)
+			trust_coefficient = TRUST_COEFFICIENT
+			# print(missed_blocks)
+			http_time_coefficient = 0.2
+			missed_blocks_coefficient = 0.6
+			trust_coefficient_coefficient = 0.5
+			if missed_blocks is None:
+				result = 0
+				return result
+			if missed_blocks >= MAX_DIFFERENCE_OF_BLOCKS:
+				result = 0
+				return result
+			print('http_response_time', http_response_time)
+			print('missed_blocks', missed_blocks)
+			normalized_http_time = 1 - http_response_time
+			missed_blocks_impact = 1 / (1 + missed_blocks)
+			trust_coefficient_impact = trust_coefficient / 100
+			result = (
+				http_time_coefficient * normalized_http_time +
+				missed_blocks_coefficient * missed_blocks_impact +
+				trust_coefficient_coefficient * trust_coefficient_impact
+			)
+			result = min(100, max(0, result * 100))
+				# print(result)
+			return result
+		except Exception as ex:
+			worker_logger.debug(ex)
 
 	async def _write_node_db(self, node_from_responce):
 		async with self._async_session() as session:
@@ -238,55 +265,53 @@ class Worker():
 			node_db = await self._get_one_node_from_db(node_name)
 			if node_db is not None:
 				try:
-					max_mini_epoch = await self._get_max_current_mini_epoch()
-					last_score_from_db = await self._get_last_node_score(node_db)
-					current_responce_score = await self._current_score(
-						current_mini_epoch,
-						response_time,
-						max_mini_epoch
-						)
-					score = await self._get_new_score(
-						last_score_from_db, 
-						current_responce_score
-						)
-					rating = round(await self._get_rating(node_name, last_score_from_db))
+					missed_blocks = await self._get_missed_blocks(current_mini_epoch)
+					await self._checking_the_operation_of_node(node_db, missed_blocks)
+					rating = await self._calculate_entity_score(response_time, missed_blocks)
 					record_args = {
 						'current_ds_epoch': current_ds_epoch,
 						'current_mini_epoch': current_mini_epoch,
 						'response_time': response_time,
-						'score': score,
 						'rating': rating,
 						'stake_amount': stake_amount,
 						'commission': commission,
 						'number_of_delegates': number_of_delegates
-					}
+				}
 					new_record = await self._create_new_record(record_args)
 					node_db.records.append(new_record)
 					session.add(new_record)
 					await session.commit()
 				except Exception as ex:
-					logging.warning(msg=ex)
+					line = {
+						'line':242
+					}
+					worker_logger.warning(msg=ex, extra=line)
 			else:
-				node_args = {
-					'node_url': node_url[0],
-					'node_name' : node_name
-				}
-				record_args = {
-					'current_ds_epoch': current_ds_epoch,
-					'current_mini_epoch': current_mini_epoch,
-					'response_time': response_time,
-					'score': 0,
-					'rating': 0,
-					'stake_amount': '0',
-					'commission': '0',
-					'number_of_delegates': 0
-				}
-				new_node = await self._create_new_node(node_args)
-				new_record = await self._create_new_record(record_args)
-				new_node.records.append(new_record)
-				session.add(new_node)
-				session.add(new_record)
-				await session.commit()
+				try:
+					node_args = {
+						'node_url': node_url[0],
+						'node_name' : node_name
+					}
+					record_args = {
+						'current_ds_epoch': current_ds_epoch,
+						'current_mini_epoch': current_mini_epoch,
+						'response_time': response_time,
+						'rating': 0,
+						'stake_amount': '0',
+						'commission': '0',
+						'number_of_delegates': 0
+					}
+					new_node = await self._create_new_node(node_args)
+					new_record = await self._create_new_record(record_args)
+					new_node.records.append(new_record)
+					session.add(new_node)
+					session.add(new_record)
+					await session.commit()
+				except Exception as ex:
+					line = {
+						'line':269
+					}
+					worker_logger.warning(msg=ex, extra=line)
 
 	async def _write_or_update_node_to_db(self):
 		try:
@@ -299,10 +324,13 @@ class Worker():
 				await self._write_node_db(elem)
 				time.sleep(PAUSE_BETWEEN_REQUESTS)
 		except Exception as ex:
-			logging.warning(msg=ex)
+			line = {
+				'line':285
+			}
+			worker_logger.warning(msg=ex, extra=line)
 
 if __name__ == '__main__':
 	async_session = asyncio.run(get_async_session())
-	print(type(async_session)) 
 	worker = Worker(async_session)
+	# print(asyncio.run(worker._get_node_record()))
 	asyncio.run(worker.run())

@@ -1,8 +1,8 @@
 """models
 
-Revision ID: bb1ed00fd34f
+Revision ID: 1f4885f1b330
 Revises: 
-Create Date: 2023-08-06 12:47:17.382246
+Create Date: 2023-08-08 12:50:46.335919
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bb1ed00fd34f'
+revision = '1f4885f1b330'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -31,6 +31,7 @@ def upgrade() -> None:
     sa.Column('node_id', sa.Integer(), nullable=False),
     sa.Column('node_url', sa.String(), nullable=False),
     sa.Column('node_name', sa.String(), nullable=False),
+    sa.Column('trust_coefficient', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('node_id'),
     sa.UniqueConstraint('node_id'),
     sa.UniqueConstraint('node_url')
@@ -54,7 +55,6 @@ def upgrade() -> None:
     )
     op.create_table('records',
     sa.Column('record_id', sa.Integer(), nullable=False),
-    sa.Column('score', sa.Integer(), nullable=True),
     sa.Column('update_time', sa.Integer(), nullable=False),
     sa.Column('node_id', sa.Integer(), nullable=True),
     sa.Column('current_ds_epoch', sa.Integer(), nullable=True),
