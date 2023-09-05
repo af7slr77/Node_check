@@ -10,15 +10,20 @@ init_worker_logger('worker')
 run_worker_logger = logging.getLogger('worker.run_worker')
 call_url_logger = logging.getLogger('worker.run_worker')
 
-async def main():
-	async_session = await get_async_session()
-	worker = Worker(async_session)
-	await worker.run()
+def main():
+	async_session = asyncio.run(get_async_session())
+	worker = Worker(async_session=async_session)
+	print(type(async_session))
+	asyncio.run(worker.run())
+	# async_session = await get_async_session()
+	# print(type(async_session))
+	# worker = Worker(async_session)
+	# await worker.run()
 
 
 if __name__ == '__main__':
 	try:
-		asyncio.run(main())
+		main()
 	except Exception as ex:
 		line = {
 			'line':25

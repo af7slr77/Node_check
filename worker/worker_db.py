@@ -14,7 +14,6 @@ from block_worker.blocks_db import BlocksWorker
 from logs.logs import init_worker_logger
 import logging
 
-# logging.basicConfig(level=logging.INFO)
 init_worker_logger('worker')
 worker_logger = logging.getLogger('worker.worker_db')
 
@@ -73,27 +72,6 @@ class Worker():
 						await send_inactive_node_notifications(user_telegram_id, node_name)
 		except Exception as ex:
 			worker_logger.debug(ex)
-
-	# async def _searching_for_empty_values_and_delays(self, node, max_mini_epoch):
-	# 	node_name = node[0].node_name
-	# 	current_ds_epoch = last_record.current_ds_epoch
-	# 	current_mini_epoch = last_record.current_mini_epoch
-	# 	nodes_users = node[0].nodes_users
-	# 	if current_ds_epoch == None:
-	# 		args = {
-	# 			'node_name': node_name,
-	# 			'current_ds_epoch': current_ds_epoch
-	# 		}
-	# 		await self._sending_warnings(nodes_users, args)
-	# 	else:
-	# 		if current_mini_epoch < max_mini_epoch - MAX_DIFFERENCE_OF_BLOCKS:
-	# 			mini_epoch_diff = max_mini_epoch - current_mini_epoch
-	# 			args = {
-	# 				'node_name': node_name,
-	# 				'current_ds_epoch': current_ds_epoch,
-	# 				'mini_epoch_diff': mini_epoch_diff
-	# 			}
-	# 			await self._sending_warnings(nodes_users, args)			
 
 	async def _checking_the_operation_of_node(self, node, missed_blocks):
 		nodes_users = node.nodes_users
@@ -283,7 +261,7 @@ class Worker():
 					await session.commit()
 				except Exception as ex:
 					line = {
-						'line':242
+						'line':264
 					}
 					worker_logger.warning(msg=ex, extra=line)
 			else:
@@ -332,5 +310,5 @@ class Worker():
 if __name__ == '__main__':
 	async_session = asyncio.run(get_async_session())
 	worker = Worker(async_session)
-	# print(asyncio.run(worker._get_node_record()))
+	# print(type(async_session))
 	asyncio.run(worker.run())
