@@ -5,6 +5,4 @@ COPY requirements.txt .
 RUN pip3 install --upgrade setuptools
 RUN pip3 install -r requirements.txt
 COPY . ./
-ENV NODE_TOKEN=6071105822:AAGJk8ZoMECAppbiS9s-a0dKCI557tghEhQ
-ENTRYPOINT []
-#CMD ["python3", "run_blocks.py"]
+ENV NODE_TOKEN=${NODE_TOKEN}

@@ -5,27 +5,33 @@ services:
     container_name: postgress_container
     ports:
       - "5432:5432"
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: "bot_db"
-      POSTGRES_USER: "andrey"
-      POSTGRES_PASSWORD: "123"
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     restart: unless-stopped
     volumes:
       - /opt/data:/var/lib/postgresql/data
+      - /opt/env:/var/lib/env
     networks:
       - internet
 
   bot:
     image: bot
     container_name: bot_container
+    env_file:
+      - .env
     environment:
       DB_HOST: postgress_container
-      POSTGRES_DB: bot_db
-      POSTGRES_USER: andrey
-      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     restart: unless-stopped
     volumes:
       - /opt/data:/var/lib/postgresql/data
+      - /opt/env:/var/lib/env
     command:
       - /bin/bash
       - -c
@@ -39,14 +45,17 @@ services:
   worker:
     image: bot
     container_name: worker_container
+    env_file:
+      - .env
     environment:
       DB_HOST: postgress_container
-      DB_NAME: bot_db
-      DB_USER: andrey
-      DB_PASSWORD: 123
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     restart: unless-stopped
     volumes:
       - /opt/data:/var/lib/postgresql/data
+      - /opt/env:/var/lib/env
     command:
       - /bin/bash
       - -c
@@ -58,14 +67,17 @@ services:
   blocks:
     image: bot
     container_name: blocks_container
+    env_file:
+      - .env
     environment:
       DB_HOST: postgress_container
-      DB_NAME: bot_db
-      DB_USER: andrey
-      DB_PASSWORD: 123
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     restart: unless-stopped
     volumes:
       - /opt/data:/var/lib/postgresql/data
+      - /opt/env:/var/lib/env
     command:
       - /bin/bash
       - -c
