@@ -25,8 +25,6 @@ class Worker():
 	async def run(self):
 		while True:
 			await self._write_or_update_node_to_db()
-			# await self._checking_the_operation_of_node()
-			# time.sleep(10)
 
 	async def _get_last_records(self):
 		async with self._async_session() as session:
@@ -204,7 +202,6 @@ class Worker():
 		try:
 			missed_blocks = await self.is_negative(missed_blocks)
 			trust_coefficient = TRUST_COEFFICIENT
-			# print(missed_blocks)
 			http_time_coefficient = 0.2
 			missed_blocks_coefficient = 0.6
 			trust_coefficient_coefficient = 0.5
@@ -225,7 +222,6 @@ class Worker():
 				trust_coefficient_coefficient * trust_coefficient_impact
 			)
 			result = min(100, max(0, result * 100))
-				# print(result)
 			return result
 		except Exception as ex:
 			worker_logger.debug(ex)
@@ -310,5 +306,4 @@ class Worker():
 if __name__ == '__main__':
 	async_session = asyncio.run(get_async_session())
 	worker = Worker(async_session)
-	# print(type(async_session))
 	asyncio.run(worker.run())

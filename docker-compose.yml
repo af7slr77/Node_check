@@ -1,72 +1,81 @@
 version: "3.6"
 services:
-  bot_db:
+  db:
     image: postgres:14.8
     container_name: postgress_container
     ports:
       - "5432:5432"
     environment:
-      DB_NAME: bot_db
-      DB_USER: andrey
-      DB_PASSWORD: 123
+      POSTGRES_DB: "bot_db"
+      POSTGRES_USER: "andrey"
+      POSTGRES_PASSWORD: "123"
     restart: unless-stopped
     volumes:
-      - opt/data:/var/lib/postgresql/data
+      - /opt/data:/var/lib/postgresql/data
     networks:
-      - localnet
+      - internet
 
   bot:
     image: bot
     container_name: bot_container
     environment:
-      DB_HOST: "postgress_container"
-      DB_NAME: bot_db
-      DB_USER: andrey
-      DB_PASSWORD: 123
+      DB_HOST: postgress_container
+      POSTGRES_DB: bot_db
+      POSTGRES_USER: andrey
+      POSTGRES_PASSWORD: 123
     restart: unless-stopped
     volumes:
-      - ./data:/var/lib/postgresql/data
-    command: ["python3", "run_bot.py"]
+      - /opt/data:/var/lib/postgresql/data
+    command:
+      - /bin/bash
+      - -c
+      - |
+          alembic revision --m 'models' --autogenerate
+          alembic upgrade head
+          python3 run_bot.py
     networks:
-      - localnet
       - internet
   
   worker:
     image: bot
     container_name: worker_container
     environment:
-      DB_HOST: "postgress_container"
+      DB_HOST: postgress_container
       DB_NAME: bot_db
       DB_USER: andrey
       DB_PASSWORD: 123
     restart: unless-stopped
     volumes:
-      - opt/data:/var/lib/postgresql/data
-    command: ["python3", "-m", "worker.worker_db"]
+      - /opt/data:/var/lib/postgresql/data
+    command:
+      - /bin/bash
+      - -c
+      - |
+          python3 -m worker.worker_db
     networks:
-      - localnet
       - internet
 
   blocks:
     image: bot
     container_name: blocks_container
     environment:
-      DB_HOST: "postgress_container"
+      DB_HOST: postgress_container
       DB_NAME: bot_db
       DB_USER: andrey
       DB_PASSWORD: 123
     restart: unless-stopped
     volumes:
-      - opt/data:/var/lib/postgresql/data
-    command: ["python3", "run_blocks.py"]
+      - /opt/data:/var/lib/postgresql/data
+    command:
+      - /bin/bash
+      - -c
+      - |
+          python3 run_blocks.py
     networks:
-      - localnet
       - internet
 
 networks:
   internet:
+    driver: bridge
     name: internet
-    driver: bridge
-  localnet:
-    name: localnet
-    driver: bridge
+
