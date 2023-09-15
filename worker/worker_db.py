@@ -30,7 +30,6 @@ class Worker():
 		async with self._async_session() as session:
 			records_query = await session.execute(select(Records))
 			last_records = records_query.unique().all()
-			print(last_records[-28:])
 
 	async def _delete_user_from_user_nodes(self, node_name, tg_user_id):
 		async with self._async_session() as session:
@@ -97,7 +96,6 @@ class Worker():
 							node_name
 						)
 		except Exception as ex:
-			# print('checking_the_operation_of_node: ', ex)
 			worker_logger.debug(ex)
 
 	async def _buttons(self):
@@ -211,8 +209,6 @@ class Worker():
 			if missed_blocks >= MAX_DIFFERENCE_OF_BLOCKS:
 				result = 0
 				return result
-			print('http_response_time', http_response_time)
-			print('missed_blocks', missed_blocks)
 			normalized_http_time = 1 - http_response_time
 			missed_blocks_impact = 1 / (1 + missed_blocks)
 			trust_coefficient_impact = trust_coefficient / 100
@@ -224,7 +220,9 @@ class Worker():
 			result = min(100, max(0, result * 100))
 			return result
 		except Exception as ex:
-			worker_logger.debug(ex)
+			# worker_logger.debug(ex)
+			line = {'line':224}
+			worker_logger.warning(msg=ex, extra=line)
 
 	async def _write_node_db(self, node_from_responce):
 		async with self._async_session() as session:

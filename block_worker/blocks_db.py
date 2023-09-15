@@ -27,9 +27,7 @@ class BlocksWorker():
 				await self._write_block_db(block_info)
 				time.sleep(5)
 		except Exception as ex:
-			line = {
-				'line':35
-				}
+			line = {'line':30}
 			blocks_logger.warning(msg=ex, extra=line)
 
 
@@ -66,10 +64,8 @@ class BlocksWorker():
 			}
 			new_block = await self._create_new_blocks_record(block_args)
 			session.add(new_block)
-			line = {
-				'line':70
-				}
-			blocks_logger.debug('block is recorded', extra=line)
+			# line = {'line':70}
+			# blocks_logger.debug('block is recorded', extra=line)
 			await session.commit()
 
 if __name__ == '__main__':
