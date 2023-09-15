@@ -18,79 +18,79 @@ services:
     networks:
       - internet
 
-  bot:
-    image: bot
-    container_name: bot_container
-    env_file:
-      - .env
-    environment:
-      DB_HOST: postgress_container
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    restart: unless-stopped
-    depends_on:
-      - db
-    volumes:
-      - /opt/data:/var/lib/postgresql/data
-      - /opt/env:/var/lib/env
-    command:
-      - /bin/bash
-      - -c
-      - |
-          alembic revision --m 'models' --autogenerate
-          alembic upgrade head
-          python3 run_bot.py
-    networks:
-      - internet
+  # bot:
+  #   image: bot
+  #   container_name: bot_container
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     DB_HOST: postgress_container
+  #     POSTGRES_DB: ${DB_NAME}
+  #     POSTGRES_USER: ${DB_USER}
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD}
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - /opt/data:/var/lib/postgresql/data
+  #     - /opt/env:/var/lib/env
+  #   command:
+  #     - /bin/bash
+  #     - -c
+  #     - |
+  #         alembic revision --m 'models' --autogenerate
+  #         alembic upgrade head
+  #         python3 run_bot.py
+  #   networks:
+  #     - internet
   
-  worker:
-    image: bot
-    container_name: worker_container
-    env_file:
-      - .env
-    environment:
-      DB_HOST: postgress_container
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    restart: unless-stopped
-    depends_on:
-      - db
-    volumes:
-      - /opt/data:/var/lib/postgresql/data
-      - /opt/env:/var/lib/env
-    command:
-      - /bin/bash
-      - -c
-      - |
-          python3 -m worker.worker_db
-    networks:
-      - internet
+  # worker:
+  #   image: bot
+  #   container_name: worker_container
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     DB_HOST: postgress_container
+  #     POSTGRES_DB: ${DB_NAME}
+  #     POSTGRES_USER: ${DB_USER}
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD}
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - /opt/data:/var/lib/postgresql/data
+  #     - /opt/env:/var/lib/env
+  #   command:
+  #     - /bin/bash
+  #     - -c
+  #     - |
+  #         python3 -m worker.worker_db
+  #   networks:
+  #     - internet
 
-  blocks:
-    image: bot
-    container_name: blocks_container
-    env_file:
-      - .env
-    environment:
-      DB_HOST: postgress_container
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    restart: unless-stopped
-    depends_on:
-      - db
-    volumes:
-      - /opt/data:/var/lib/postgresql/data
-      - /opt/env:/var/lib/env
-    command:
-      - /bin/bash
-      - -c
-      - |
-          python3 run_blocks.py
-    networks:
-      - internet
+  # blocks:
+  #   image: bot
+  #   container_name: blocks_container
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     DB_HOST: postgress_container
+  #     POSTGRES_DB: ${DB_NAME}
+  #     POSTGRES_USER: ${DB_USER}
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD}
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - /opt/data:/var/lib/postgresql/data
+  #     - /opt/env:/var/lib/env
+  #   command:
+  #     - /bin/bash
+  #     - -c
+  #     - |
+  #         python3 run_blocks.py
+  #   networks:
+  #     - internet
 
 networks:
   internet:
