@@ -1,5 +1,6 @@
 from aiogram.filters.callback_data import CallbackData
 
+
 class SubscribeCallback(CallbackData, prefix='subscribe_callback'):
 	node_name: str
 	action: str
