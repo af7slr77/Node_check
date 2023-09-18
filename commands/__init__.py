@@ -11,7 +11,7 @@ from callbacks.sent_nodes_info import sent_nodes_info
 from .get_nodes_list import get_nodes_list
 from callbacks.subscribe import subscribe
 from callbacks.cancel_subscription import cancel_subscription
-from callbacks.my_nodes import my_nodes
+from callbacks.my_nodes import get_my_nodes_list
 from callbacks.callbacks import SubscribeCallback, CancelSubscriptionCallback, MyNodesCallback
 
 async def register_user_comands(router: Router):
@@ -26,7 +26,7 @@ async def register_user_comands(router: Router):
 
 	router.callback_query.register(subscribe,  SubscribeCallback.filter(F.action == 'subscribe'))
 	router.callback_query.register(cancel_subscription,  CancelSubscriptionCallback.filter(F.action == 'cancel_subscription'))
-	router.callback_query.register(my_nodes,  MyNodesCallback.filter(F.action == 'my_nodes'))
+	router.callback_query.register(get_my_nodes_list,  MyNodesCallback.filter(F.action == 'my_nodes'))
 	# nodes keyboard's callbacks
 	nodes_list = await get_nodes_list()
 	for node in nodes_list:
