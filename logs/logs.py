@@ -1,6 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
+
 def init_worker_logger(name):
     logger = logging.getLogger(name)
     FORMAT = '%(asctime)s - %(name)s :: %(line)s - %(levelname)s - %(message)s'
@@ -8,7 +9,11 @@ def init_worker_logger(name):
     sh = logging.StreamHandler()
     sh.setFormatter(logging.Formatter(FORMAT))
     sh.setLevel(logging.DEBUG)
-    fh = RotatingFileHandler(filename="/tmp/worker.log", maxBytes=5, backupCount=2) 
+    fh = RotatingFileHandler(
+        filename="/tmp/worker.log", 
+        maxBytes=5, 
+        backupCount=2
+    ) 
     fh.setFormatter(logging.Formatter(FORMAT))
     fh.setLevel(logging.DEBUG)
     logger.addHandler(sh)
@@ -21,7 +26,11 @@ def init_block_logger(name):
     sh = logging.StreamHandler()
     sh.setFormatter(logging.Formatter(FORMAT))
     sh.setLevel(logging.DEBUG)
-    fh = RotatingFileHandler(filename="/tmp/block.log", maxBytes=5, backupCount=2) 
+    fh = RotatingFileHandler(
+        filename="/tmp/block.log", 
+        maxBytes=5, 
+        backupCount=2
+    ) 
     fh.setFormatter(logging.Formatter(FORMAT))
     fh.setLevel(logging.DEBUG)
     logger.addHandler(sh)
@@ -34,7 +43,11 @@ def init_bot_logger(name):
     sh = logging.StreamHandler()
     sh.setFormatter(logging.Formatter(FORMAT))
     sh.setLevel(logging.DEBUG)
-    fh = RotatingFileHandler(filename="/tmp/bot.log", maxBytes=5, backupCount=2) 
+    fh = RotatingFileHandler(
+        filename="/tmp/bot.log", 
+        maxBytes=5, 
+        backupCount=2
+    ) 
     fh.setFormatter(logging.Formatter(FORMAT))
     fh.setLevel(logging.DEBUG)
     logger.addHandler(sh)
