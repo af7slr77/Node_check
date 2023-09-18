@@ -3,6 +3,7 @@ from aiogram.utils.keyboard import InlineKeyboardButton
 from aiogram import types
 from .get_nodes_list import get_nodes_list
 
+
 async def get_sorted_nodes_list():
 	nodes_list = await get_nodes_list()
 	sorted_nodes_list = [

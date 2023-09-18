@@ -47,5 +47,3 @@ async def register_user_comands(router: Router):
 			sent_nodes_info, 
 			F.data == f'{node}'
 		)
-
-	
