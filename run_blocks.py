@@ -15,12 +15,8 @@ def main():
 	block = BlocksWorker(async_session=async_session)
 	asyncio.run(block.run())
 
-
 if __name__ == '__main__':
 	try:
 		main()
 	except Exception as ex:
-		line = {
-			'line':25
-		}
-		run_worker_logger.warning(msg=ex, extra=line)
+		run_worker_logger.warning(msg=ex, extra={'line':23})
