@@ -33,6 +33,7 @@ class Worker():
 
 	async def _delete_user_from_user_nodes(self, node_name, tg_user_id):
 		async with self._async_session() as session:
+			#исправить эту функцию, при попытке отписаться от ноды, на которую не подписан проскакивает ошибка
 			node = await self._get_one_node_from_db(node_name)
 			user = await self._get_one_user_from_db(tg_user_id)
 			nodes_user_query = await session.execute(select(NodesUsers).filter_by(node_id=node.node_id))

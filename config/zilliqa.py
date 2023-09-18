@@ -1,5 +1,5 @@
 MAIN_NODE = 'https://api.zilliqa.com/'
-
+URL_FOR_DELEGATES = 'https://ssn.zilpay.io/api'
 MAX_NODE_TIMEOUT_SECOND = 10
 
 MIN_DIFFERENCE_OF_BLOCKS = 2

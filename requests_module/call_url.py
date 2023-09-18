@@ -8,18 +8,26 @@ from logs.logs import init_worker_logger
 init_worker_logger('request_modules')
 logger = logging.getLogger('request_modules.call_url')
  
+
 def call_url(node_url):
-	params = json.dumps( {
-		"id": "1",
-		"jsonrpc": "2.0",
-		"method": "GetBlockchainInfo",
-		"params": [""]
-		} )
+	params = json.dumps(
+		{
+			"id": "1",
+			"jsonrpc": "2.0",
+			"method": "GetBlockchainInfo",
+			"params": [""]
+		} 
+	)
 	headers = {"Content-Type": "application/json"}
 	proxies = {''}
 	try:
 		start_time = time()
-		resp = requests.post(node_url, data=params, headers=headers, timeout = MAX_NODE_TIMEOUT_SECOND).json()
+		resp = requests.post(
+			node_url, 
+			data=params, 
+			headers=headers, 
+			timeout = MAX_NODE_TIMEOUT_SECOND
+		).json()
 		end_time = time()
 		response_time = end_time - start_time
 		current_ds_epoch = int(resp['result']['CurrentDSEpoch'])
@@ -33,16 +41,10 @@ def call_url(node_url):
 			}
 
 	except Exception as ex:
-		line = {
-			'line':36
-		}
-		logger.warning(msg=ex, extra=line)
+		logger.warning(msg=ex, extra={'line':44})
 		return {
 			'status': 408,
 			'current_ds_epoch': None, 
 			'current_mini_epoch': None,
 			'response_time': None,
 		}
-
-if __name__ == '__main__':
-	print(call_url('https://stakingseed-api.seed.zilliqa.com', 'zilliqa'))
