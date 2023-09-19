@@ -1,15 +1,19 @@
 import asyncio
 from requests_module.get_nodes_data import get_total_info
 from requests_module.call_url import call_url
-from models.models import Node, Records, User, NodesUsers, Blocks
+from models.models import Node, Records, User, NodesUsers
 from datetime import datetime
 from sqlalchemy import select
-from sqlalchemy.orm import lazyload, joinedload
+from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 from db.engine import get_async_session
 import time
-from commands.sending_warnings_to_users import send_inactive_node_notifications, send_missed_blocks_notifications
-from config.zilliqa import *
+from commands.sending_warnings_to_users import send_inactive_node_notifications
+from commands.sending_warnings_to_users import send_missed_blocks_notifications
+from config.zilliqa import TRUST_COEFFICIENT
+from config.zilliqa import MIN_DIFFERENCE_OF_BLOCKS
+from config.zilliqa import MAX_DIFFERENCE_OF_BLOCKS
+from config.zilliqa import PAUSE_BETWEEN_REQUESTS
 from block_worker.blocks_db import BlocksWorker
 from logs.logs import init_worker_logger
 import logging
@@ -17,8 +21,8 @@ import logging
 init_worker_logger('worker')
 worker_logger = logging.getLogger('worker.worker_db')
 
-class Worker():
 
+class Worker():
 	def __init__(self, async_session):
 		self._async_session = async_session
 
@@ -26,52 +30,76 @@ class Worker():
 		while True:
 			await self._write_or_update_node_to_db()
 
-	async def _get_last_records(self):
+	# async def _get_last_records(self):
 		async with self._async_session() as session:
 			records_query = await session.execute(select(Records))
 			last_records = records_query.unique().all()
 
 	async def _delete_user_from_user_nodes(self, node_name, tg_user_id):
 		async with self._async_session() as session:
-			#исправить эту функцию, при попытке отписаться от ноды, на которую не подписан проскакивает ошибка
 			node = await self._get_one_node_from_db(node_name)
 			user = await self._get_one_user_from_db(tg_user_id)
-			nodes_user_query = await session.execute(select(NodesUsers).filter_by(node_id=node.node_id))
-			nodes_user = nodes_user_query.unique().one_or_none()[0]
-			await session.delete(nodes_user)
-			await session.commit()
+			stmt = select(NodesUsers).where(
+				NodesUsers.node_id==node.node_id, 
+				NodesUsers.user_id == user.user_id
+			)
+			responce = await session.execute(stmt)
+			nodes_user = responce.unique().one_or_none()
+			if nodes_user is not None:
+				await session.delete(nodes_user[0])
+				await session.commit()
+				return True
+			else:
+				return False
 
 	async def _get_max_curent_ds_epoch(self):
 		async with self._async_session() as session:
-			max_curent_ds_epoch_query = await session.execute(select(func.max(Records.current_ds_epoch)))
-			max_curent_ds_epoch = max_curent_ds_epoch_query.unique().one_or_none()
+			stmt = select(func.max(Records.current_ds_epoch))
+			responce = await session.execute(stmt)
+			max_curent_ds_epoch = responce.unique().one_or_none()
 			if max_curent_ds_epoch == None:
 				return max_curent_ds_epoch
 			return max_curent_ds_epoch[0]
 			
 	async def _get_max_current_mini_epoch(self):
 		blocks_worker = BlocksWorker(async_session)
-		max_current_mini_epoch = await blocks_worker._get_max_current_mini_epoch()
-		return max_current_mini_epoch
+		result = await blocks_worker._get_max_current_mini_epoch()
+		return result
 
-	async def _sending_warnings(self, nodes_users, node_name, missed_blocks):
+	async def _sending_warnings(
+		self, 
+		nodes_users, 
+		node_name, 
+		missed_blocks
+		):
 		try:
 			if missed_blocks is not None:
 				for user in nodes_users:
 					user_telegram_id = user.user_telegram_id
 					if user_telegram_id:
-						await send_missed_blocks_notifications(user_telegram_id, node_name, missed_blocks)
+						await send_missed_blocks_notifications(
+							user_telegram_id, 
+							node_name, 
+							missed_blocks
+						)
 					else:
 						pass
 			else:
 				for user in nodes_users:
 					user_telegram_id = user.user_telegram_id
 					if user_telegram_id:
-						await send_inactive_node_notifications(user_telegram_id, node_name)
+						await send_inactive_node_notifications(
+							user_telegram_id,
+							 node_name
+						)
 		except Exception as ex:
-			worker_logger.debug(ex)
+			worker_logger.debug(ex, extra={'line':93})
 
-	async def _checking_the_operation_of_node(self, node, missed_blocks):
+	async def _checking_the_operation_of_node(
+		self, 
+		node, 
+		missed_blocks
+	):
 		nodes_users = node.nodes_users
 		node_name = node.node_name
 		try:
@@ -97,32 +125,39 @@ class Worker():
 							node_name
 						)
 		except Exception as ex:
-			worker_logger.debug(ex)
+			worker_logger.debug(ex, extra={'line':125})
 
 	async def _buttons(self):
 		async with self._async_session() as session:
-			buttons_query = await session.execute(select(Node))
-			buttons = buttons_query.all()
+			result = await session.execute(select(Node))
+			buttons = result.all()
 		return buttons
 
 	async def _get_one_node_from_db(self, node_name):
 		async with self._async_session() as session:
-			node = await session.execute(select(Node).filter_by(node_name = node_name).options(joinedload(Node.records)))
-			node = node.unique().one_or_none()
+			stmt = select(Node).filter_by(
+				node_name = node_name
+				).options(joinedload(Node.records))
+			result = await session.execute(stmt)
+			node = result.unique().one_or_none()
 			if node == None:
 				return node
 			return node[0]
 
 	async def _get_all_nodes_from_db(self):
 		async with self._async_session() as session:
-			all_nodes = await session.execute(select(Node).options(joinedload(Node.records)).options(joinedload(Node.nodes_users)))
-			all_nodes = all_nodes.unique().all()
+			stmt = select(Node).options(
+				joinedload(Node.records)
+			).options(joinedload(Node.nodes_users))
+			result = await session.execute(stmt)
+			all_nodes = result.unique().all()
 			return all_nodes
 	
 	async def _get_one_user_from_db(self, tg_user_id):
 		async with self._async_session() as session:
-			user = await session.execute(select(User).filter_by(user_telegram_id = tg_user_id ))
-			user = user.unique().one_or_none()
+			stmt = select(User).filter_by(user_telegram_id = tg_user_id)
+			result = await session.execute(stmt)
+			user = result.unique().one_or_none()
 			if user == None:
 				return user
 			else:
@@ -131,13 +166,15 @@ class Worker():
 
 	async def _get_nodes_users(self, node_name, ):
 		async with self._async_session() as session:
-			node_query = await session.execute(select(Node).options(joinedload(Node.nodes_users)).filter_by(node_name = node_name ))
-			node = node_query.first()[0]
+			stmt = select(Node).options(
+				joinedload(Node.nodes_users)
+			).filter_by(node_name = node_name )
+			result = await session.execute(stmt)
+			node = result.first()[0]
 			nodes_users = node.nodes_users
 			return nodes_users
 			
 	async def _check_subscribe(self, node_name, tg_user_id):
-		"""This func check subscribe"""
 		nodes_users = await self._get_nodes_users(node_name)
 		for user in nodes_users:
 			tg_user_id_from_db = user.user_telegram_id
@@ -156,16 +193,13 @@ class Worker():
 				session.add(node)
 				await session.commit()
 			except Exception as ex:
-				line = {
-					'line':158
-			}
-				worker_logger.warning(msg=ex, extra=line)
+				worker_logger.warning(msg=ex, extra={'line':193})
 
 	async def _create_new_node(self, node_args):
 		new_node = Node(
 			node_url = node_args['node_url'],
 			node_name = node_args['node_name'],
-			)
+		)
 		return new_node
 
 	async def _create_new_record(self, record_args):
@@ -178,7 +212,7 @@ class Worker():
 			stake_amount = record_args['stake_amount'],
 			commission = record_args['commission'],
 			number_of_delegates = record_args['number_of_delegates']#
-			)
+		)
 		return new_record
 
 	async def _get_missed_blocks(self, current_mini_epoch):
@@ -189,7 +223,6 @@ class Worker():
 		return missed_blocks_count
 
 	async def is_negative(self, missed_blocks):
-
 		if missed_blocks is not None:
 			if missed_blocks < 0:
 				return 0
@@ -197,7 +230,11 @@ class Worker():
 				return missed_blocks
 		return missed_blocks
 
-	async def _calculate_entity_score(self, http_response_time, missed_blocks):
+	async def _calculate_entity_score(
+		self, 
+		http_response_time, 
+		missed_blocks
+	):
 		try:
 			missed_blocks = await self.is_negative(missed_blocks)
 			trust_coefficient = TRUST_COEFFICIENT
@@ -221,9 +258,7 @@ class Worker():
 			result = min(100, max(0, result * 100))
 			return result
 		except Exception as ex:
-			# worker_logger.debug(ex)
-			line = {'line':224}
-			worker_logger.warning(msg=ex, extra=line)
+			worker_logger.warning(msg=ex, extra={'line':258})
 
 	async def _write_node_db(self, node_from_responce):
 		async with self._async_session() as session:
@@ -238,9 +273,16 @@ class Worker():
 			node_db = await self._get_one_node_from_db(node_name)
 			if node_db is not None:
 				try:
-					missed_blocks = await self._get_missed_blocks(current_mini_epoch)
-					await self._checking_the_operation_of_node(node_db, missed_blocks)
-					rating = await self._calculate_entity_score(response_time, missed_blocks)
+					missed_blocks = await self._get_missed_blocks(
+						current_mini_epoch
+					)
+					await self._checking_the_operation_of_node(
+						node_db, missed_blocks
+					)
+					rating = await self._calculate_entity_score(
+						response_time, 
+						missed_blocks
+					)
 					record_args = {
 						'current_ds_epoch': current_ds_epoch,
 						'current_mini_epoch': current_mini_epoch,
@@ -249,16 +291,13 @@ class Worker():
 						'stake_amount': stake_amount,
 						'commission': commission,
 						'number_of_delegates': number_of_delegates
-				}
+					}
 					new_record = await self._create_new_record(record_args)
 					node_db.records.append(new_record)
 					session.add(new_record)
 					await session.commit()
 				except Exception as ex:
-					line = {
-						'line':264
-					}
-					worker_logger.warning(msg=ex, extra=line)
+					worker_logger.warning(msg=ex, extra={'line':297})
 			else:
 				try:
 					node_args = {
@@ -281,10 +320,7 @@ class Worker():
 					session.add(new_record)
 					await session.commit()
 				except Exception as ex:
-					line = {
-						'line':269
-					}
-					worker_logger.warning(msg=ex, extra=line)
+					worker_logger.warning(msg=ex, extra={'line':320})
 
 	async def _write_or_update_node_to_db(self):
 		try:
@@ -297,10 +333,7 @@ class Worker():
 				await self._write_node_db(elem)
 				time.sleep(PAUSE_BETWEEN_REQUESTS)
 		except Exception as ex:
-			line = {
-				'line':285
-			}
-			worker_logger.warning(msg=ex, extra=line)
+			worker_logger.warning(msg=ex, extra={'line':333})
 
 if __name__ == '__main__':
 	async_session = asyncio.run(get_async_session())

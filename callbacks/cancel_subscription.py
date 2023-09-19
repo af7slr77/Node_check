@@ -12,6 +12,13 @@ async def cancel_subscription(
 	node_name = callback_data.node_name
 	tg_user_id = call.from_user.id
 	worker = Worker(async_session)
-	await worker._delete_user_from_user_nodes(node_name, tg_user_id)
-	msg = f'You are unsubscribed from {node_name}!'
-	await call.message.answer(text=msg)
+	result = await worker._delete_user_from_user_nodes(
+		node_name, 
+		tg_user_id
+	)
+	if result:
+		msg = f'You are unsubscribed from {node_name}!'
+		await call.message.answer(text=msg)
+	else:
+		msg = f'This node is not in your subscriptions!'
+		await call.message.answer(text=msg)
