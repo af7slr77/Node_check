@@ -30,11 +30,6 @@ class Worker():
 		while True:
 			await self._write_or_update_node_to_db()
 
-	# async def _get_last_records(self):
-		async with self._async_session() as session:
-			records_query = await session.execute(select(Records))
-			last_records = records_query.unique().all()
-
 	async def _delete_user_from_user_nodes(self, node_name, tg_user_id):
 		async with self._async_session() as session:
 			node = await self._get_one_node_from_db(node_name)
@@ -93,7 +88,7 @@ class Worker():
 							 node_name
 						)
 		except Exception as ex:
-			worker_logger.debug(ex, extra={'line':93})
+			worker_logger.debug(ex, extra={'line':91})
 
 	async def _checking_the_operation_of_node(
 		self, 
@@ -125,7 +120,7 @@ class Worker():
 							node_name
 						)
 		except Exception as ex:
-			worker_logger.debug(ex, extra={'line':125})
+			worker_logger.debug(ex, extra={'line':123})
 
 	async def _buttons(self):
 		async with self._async_session() as session:
@@ -193,7 +188,7 @@ class Worker():
 				session.add(node)
 				await session.commit()
 			except Exception as ex:
-				worker_logger.warning(msg=ex, extra={'line':193})
+				worker_logger.warning(msg=ex, extra={'line':191})
 
 	async def _create_new_node(self, node_args):
 		new_node = Node(
@@ -258,7 +253,7 @@ class Worker():
 			result = min(100, max(0, result * 100))
 			return result
 		except Exception as ex:
-			worker_logger.warning(msg=ex, extra={'line':258})
+			worker_logger.warning(msg=ex, extra={'line':256})
 
 	async def _write_node_db(self, node_from_responce):
 		async with self._async_session() as session:
@@ -297,7 +292,7 @@ class Worker():
 					session.add(new_record)
 					await session.commit()
 				except Exception as ex:
-					worker_logger.warning(msg=ex, extra={'line':297})
+					worker_logger.warning(msg=ex, extra={'line':295})
 			else:
 				try:
 					node_args = {
@@ -320,7 +315,7 @@ class Worker():
 					session.add(new_record)
 					await session.commit()
 				except Exception as ex:
-					worker_logger.warning(msg=ex, extra={'line':320})
+					worker_logger.warning(msg=ex, extra={'line':318})
 
 	async def _write_or_update_node_to_db(self):
 		try:
@@ -333,9 +328,10 @@ class Worker():
 				await self._write_node_db(elem)
 				time.sleep(PAUSE_BETWEEN_REQUESTS)
 		except Exception as ex:
-			worker_logger.warning(msg=ex, extra={'line':333})
+			worker_logger.warning(msg=ex, extra={'line':331})
 
 if __name__ == '__main__':
 	async_session = asyncio.run(get_async_session())
 	worker = Worker(async_session)
 	asyncio.run(worker.run())
+
