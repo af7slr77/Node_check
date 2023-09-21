@@ -1,7 +1,7 @@
 from aiogram import Bot
 import os
 
-bot = Bot(token=os.getenv("NODE_TOKEN"))
+bot = Bot(token=os.getenv("BOT_TOKEN"))
 
 
 async def send_inactive_node_notifications(
@@ -23,4 +23,4 @@ async def send_missed_blocks_notifications(
 	await bot.send_message(
 		chat_id=chat_id, 
 		text=msg
-		)
+	)
