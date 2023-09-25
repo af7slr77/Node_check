@@ -18,6 +18,9 @@ services:
       - internet
 
   bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: bot
     container_name: bot_container
     env_file:
