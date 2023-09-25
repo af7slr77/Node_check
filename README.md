@@ -23,3 +23,4 @@ env varibles:
 ```bash
 $ sudo docker compose up -d
 ```
+.
