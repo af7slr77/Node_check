@@ -19,12 +19,6 @@ env varibles:
  * `DB_PASSWORD=<your_password>`
  * `BOT_TOKEN=<your_telegram_bot_token>`
 
-### Build Docker image:
-```bash
-$ sudo docker build -t bot .
-```
-
-
 ### Run Docker Compose file:
 ```bash
 $ sudo docker compose up -d
