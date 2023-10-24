@@ -15,7 +15,7 @@ class BlocksWorker():
 	def __init__(self, async_session):
 		self._async_session = async_session
 
-	async def run(self):
+	async def run(self) -> List:
 		try:
 			while True:
 				block_info = get_blocks()
