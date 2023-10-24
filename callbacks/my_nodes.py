@@ -5,12 +5,12 @@ from .callbacks import MyNodesCallback
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.utils.keyboard import InlineKeyboardButton
 
-async def sort_users_nodes(users_nodes):
+
+async def sort_users_nodes(users_nodes: list):
 	sorted_users_nodes = [
 		users_nodes[i:i+2] 
 		for i in range(0, len(users_nodes), 2)]
 	return sorted_users_nodes
-
 
 async def get_my_nodes_list(
 	call: types.CallbackQuery,

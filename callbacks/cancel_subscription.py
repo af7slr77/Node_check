@@ -7,12 +7,12 @@ from .callbacks import CancelSubscriptionCallback
 async def cancel_subscription(
 	call: types.CallbackQuery, 
 	callback_data: CancelSubscriptionCallback
-	):
+	) -> None:
 	async_session = await get_async_session()
-	node_name = callback_data.node_name
-	tg_user_id = call.from_user.id
+	node_name: str = callback_data.node_name
+	tg_user_id: int = call.from_user.id
 	worker = Worker(async_session)
-	result = await worker._delete_user_from_user_nodes(
+	result: bool = await worker._delete_user_from_user_nodes(
 		node_name, 
 		tg_user_id
 	)

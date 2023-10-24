@@ -7,12 +7,13 @@ from .callbacks import MyNodesCallback
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.utils.keyboard import InlineKeyboardButton
 from time import time
+from typing import Tuple, Union
 
 
 async def check_current_ds_and_min_epoch(
-	current_mini_epoch, 
-	current_ds_epoch
-	):
+	current_mini_epoch: Union[int, None], 
+	current_ds_epoch: Union[int, None]
+	) -> Tuple[int]:
 	if current_mini_epoch is not None and current_ds_epoch is not None:
 		current_mini_epoch = "{:,.0f}".format(
 			round(int(current_mini_epoch))
