@@ -23,7 +23,7 @@ async def bot():
 			)
 		)
 	dp = Dispatcher()
-	bot = Bot(token=os.getenv('BOT_TOKEN'))
+	bot = Bot(token=os.getenv("BOT_TOKEN"))
 	await bot.set_my_commands(commands=comands_for_bot)
 	await register_user_comands(dp)
 	await dp.start_polling(bot, async_session=async_session)
