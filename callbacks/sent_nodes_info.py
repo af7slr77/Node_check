@@ -14,11 +14,11 @@ async def check_current_ds_and_min_epoch(
 	current_ds_epoch: Union[int, None]
 ) -> Tuple[Union[int, None], Union[int, None]]:
 	if current_mini_epoch is not None and current_ds_epoch is not None:
-		current_mini_epoch = int("{:,.0f}".format(
-			round(current_mini_epoch))
+		current_mini_epoch = "{:,.0f}".format(
+			round(current_mini_epoch)
 		)
-		current_ds_epoch = int("{:,.0f}".format(
-			round(current_ds_epoch))
+		current_ds_epoch = "{:,.0f}".format(
+			round(current_ds_epoch)
 		)
 		return current_mini_epoch, current_ds_epoch
 	else:
