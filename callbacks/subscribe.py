@@ -22,4 +22,4 @@ async def subscribe(
 				tg_user_id
 			)
 			already_subscribed_msg: str = f"You are subscribed to {node_name}!"
-			await call.message.answer(text=make_subscribe)
+			await call.message.answer(text=already_subscribed_msg)
