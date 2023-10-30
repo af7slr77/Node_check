@@ -4,7 +4,10 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from config.zilliqa import TRUST_COEFFICIENT
 
+
+
 BaseModel = declarative_base()
+
 
 class NodesUsers(BaseModel):
 	__tablename__ = "nodes_users"
