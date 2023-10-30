@@ -16,9 +16,11 @@ async def cancel_subscription(
 		node_name, 
 		tg_user_id
 	)
-	if result:
-		msg = f'You are unsubscribed from {node_name}!'
-		await call.message.answer(text=msg)
-	else:
-		msg = f'This node is not in your subscriptions!'
-		await call.message.answer(text=msg)
+	if call.message:
+		if result:
+			unsubscribed_msg: str = f'You are unsubscribed from {node_name}!'
+			await call.message.answer(text=unsubscribed_msg)
+		else:
+			node_not_found_msg: str = f'This node is not in your subscriptions!'
+			await call.message.answer(text=node_not_found_msg)
+
