@@ -8,7 +8,7 @@ from typing import Union, Dict, List, Any
 get_blocks_logger = logging.getLogger('block.block_worker.get_blocks')
 
 
-def get_blocks() -> Dict[str, Union[float, int, None]] :
+def get_blocks() -> Dict[str, Union[float, int, None]]:
     params: str = json.dumps(
         {
             "id": "1",
