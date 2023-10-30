@@ -18,14 +18,13 @@ class RegisterCheck(BaseMiddleware):
 			[Message, Dict[str, Any]], 
 			Awaitable[Any]
 		],
-		event: Union[Message, CallbackQuery],
+		event,
 		data: Dict[str, Any] 
 	) -> Any:
-		async_session: async_session = data['async_session']
+		async_session = data['async_session']
 		async with async_session() as session:
-			stmt = select(User).where(
-				User.user_telegram_id == event.from_user.id
-			)
+			telegram_id = event.from_user.id
+			stmt = select(User).filter_by(user_telegram_id = telegram_id)
 			result = await session.execute(stmt)
 			user = result.one_or_none()
 			if user is not None:
@@ -40,5 +39,5 @@ class RegisterCheck(BaseMiddleware):
 					session.add(new_user)
 					await session.commit()
 				except Exception as ex:
-					blocks_logger.debug(ex, extra={'line':42})
+					register_check_logger.debug(ex, extra={'line':42})
 		return await handler(event, data)
