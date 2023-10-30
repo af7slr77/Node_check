@@ -2,7 +2,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 
-def init_worker_logger(name):
+def init_worker_logger(name: str):
     logger = logging.getLogger(name)
     FORMAT = '%(asctime)s - %(name)s :: %(line)s - %(levelname)s - %(message)s'
     logger.setLevel(logging.DEBUG)
@@ -19,7 +19,7 @@ def init_worker_logger(name):
     logger.addHandler(sh)
     logger.addHandler(fh)
 
-def init_block_logger(name):
+def init_block_logger(name: str):
     logger = logging.getLogger(name)
     FORMAT = '%(asctime)s - %(name)s :: %(line)s - %(levelname)s - %(message)s'
     logger.setLevel(logging.DEBUG)
@@ -36,7 +36,7 @@ def init_block_logger(name):
     logger.addHandler(sh)
     logger.addHandler(fh)
 
-def init_bot_logger(name):
+def init_bot_logger(name: str):
     logger = logging.getLogger(name)
     FORMAT = '%(asctime)s - %(name)s :: %(line)s - %(levelname)s - %(message)s'
     logger.setLevel(logging.DEBUG)
@@ -53,7 +53,7 @@ def init_bot_logger(name):
     logger.addHandler(sh)
     logger.addHandler(fh)
 
-def init_register_check_logger(name):
+def init_register_check_logger(name: str):
     logger = logging.getLogger(name)
     FORMAT = '%(asctime)s - %(name)s :: %(line)s - %(levelname)s - %(message)s'
     logger.setLevel(logging.DEBUG)
