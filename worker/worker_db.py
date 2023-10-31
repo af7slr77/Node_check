@@ -17,6 +17,7 @@ from config.zilliqa import PAUSE_BETWEEN_REQUESTS
 from block_worker.blocks_db import BlocksWorker
 from logs.logs import init_worker_logger
 import logging
+from typing import List, Union
 
 init_worker_logger('worker')
 worker_logger = logging.getLogger('worker.worker_db')
@@ -30,7 +31,11 @@ class Worker():
 		while True:
 			await self._write_or_update_node_to_db()
 
-	async def _delete_user_from_user_nodes(self, node_name, tg_user_id):
+	async def _delete_user_from_user_nodes(
+		self,
+		node_name: str, 
+		tg_user_id: int
+		) -> bool:
 		async with self._async_session() as session:
 			node = await self._get_one_node_from_db(node_name)
 			user = await self._get_one_user_from_db(tg_user_id)
@@ -47,7 +52,7 @@ class Worker():
 			else:
 				return False
 
-	async def _get_max_curent_ds_epoch(self):
+	async def _get_max_curent_ds_epoch(self) -> int:
 		async with self._async_session() as session:
 			stmt = select(func.max(Records.current_ds_epoch))
 			responce = await session.execute(stmt)
@@ -56,21 +61,21 @@ class Worker():
 				return max_curent_ds_epoch
 			return max_curent_ds_epoch[0]
 			
-	async def _get_max_current_mini_epoch(self):
+	async def _get_max_current_mini_epoch(self) -> Union[int, None]:
 		blocks_worker = BlocksWorker(async_session)
 		result = await blocks_worker._get_max_current_mini_epoch()
 		return result
 
 	async def _sending_warnings(
 		self, 
-		nodes_users, 
-		node_name, 
-		missed_blocks
-		):
+		nodes_users: List[User], 
+		node_name: str, 
+		missed_blocks: int
+		) -> None:
 		try:
 			if missed_blocks is not None:
 				for user in nodes_users:
-					user_telegram_id = user.user_telegram_id
+					user_telegram_id = int(user.user_telegram_id)
 					if user_telegram_id:
 						await send_missed_blocks_notifications(
 							user_telegram_id, 
@@ -88,7 +93,7 @@ class Worker():
 							 node_name
 						)
 		except Exception as ex:
-			worker_logger.debug(ex, extra={'line':91})
+			worker_logger.debug(ex, extra={'line':96})
 
 	async def _checking_the_operation_of_node(
 		self, 
@@ -218,12 +223,10 @@ class Worker():
 		return missed_blocks_count
 
 	async def is_negative(self, missed_blocks):
-		if missed_blocks is not None:
-			if missed_blocks < 0:
-				return 0
-			else:
-				return missed_blocks
+		if missed_blocks is not None and missed_blocks < 0:
+			return 0
 		return missed_blocks
+
 
 	async def _calculate_entity_score(
 		self, 
@@ -334,4 +337,3 @@ if __name__ == '__main__':
 	async_session = asyncio.run(get_async_session())
 	worker = Worker(async_session)
 	asyncio.run(worker.run())
-
