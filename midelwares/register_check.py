@@ -18,12 +18,13 @@ class RegisterCheck(BaseMiddleware):
 			[Message, Dict[str, Any]], 
 			Awaitable[Any]
 		],
-		event,
-		data: Dict[str, Any] 
+		event: Any,
+		data: Dict[str, Any]
 	) -> Any:
 		async_session = data['async_session']
+		print(type(event))
 		async with async_session() as session:
-			telegram_id = event.from_user.id
+			telegram_id: int = event.from_user.id
 			stmt = select(User).filter_by(user_telegram_id = telegram_id)
 			result = await session.execute(stmt)
 			user = result.one_or_none()
