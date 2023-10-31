@@ -1,9 +1,9 @@
 import requests
 import json
 from config.zilliqa import MAIN_NODE, MAX_NODE_TIMEOUT_SECOND, URL_FOR_DELEGATES
-from typing import List, Dict
+from typing import List, Dict, Union
 
-def get_nodes_urls() -> List[Dict[str, str]]:
+def get_nodes_urls() -> List[Dict[str, str| int]]:
 	params: str = json.dumps(
 		{
 			"id": "1",
@@ -68,9 +68,9 @@ def get_delegators() -> Dict[str, int]:
 		number_of_delegates[f"{key}"] = len(value)
 	return number_of_delegates
 
-def get_total_info() -> List[Dict]:
+def get_total_info() -> List[Dict[str, str|int]]:
 	delegators = get_delegators()
-	nodes: List[Dict[str, str]] = get_nodes_urls()
+	nodes = get_nodes_urls()
 	for node in nodes:
 		node_address = node['node_address']
 		number_of_delegates = delegators.get(f"{node_address}", 0)
