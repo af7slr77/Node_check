@@ -4,13 +4,14 @@ from config.zilliqa import MAX_NODE_TIMEOUT_SECOND
 from time import time
 import logging
 from logs.logs import init_worker_logger 
+from typing import Dict, Union
 
 init_worker_logger('request_modules')
 logger = logging.getLogger('request_modules.call_url')
  
 
-def call_url(node_url):
-	params = json.dumps(
+def call_url(node_url: str) -> Dict[str, Union[float, None]]:
+	params: str = json.dumps(
 		{
 			"id": "1",
 			"jsonrpc": "2.0",
@@ -48,3 +49,9 @@ def call_url(node_url):
 			'current_mini_epoch': None,
 			'response_time': None,
 		}
+	return {
+		'status': 500,
+		'current_ds_epoch': None, 
+		'current_mini_epoch': None,
+		'response_time': None,
+	}
