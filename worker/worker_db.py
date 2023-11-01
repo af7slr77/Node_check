@@ -213,7 +213,7 @@ class Worker():
 		)
 		return new_node
 
-	async def _create_new_record(self, record_args):
+	async def _create_new_record(self, record_args: Dict[str, str|int|float]) -> Records:
 		new_record = Records(
 			update_time=datetime.utcnow().timestamp(),
 			current_ds_epoch=record_args['current_ds_epoch'],
