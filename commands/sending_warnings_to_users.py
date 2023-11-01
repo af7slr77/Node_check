@@ -2,7 +2,7 @@ from aiogram import Bot
 import os
 from typing import Union
 
-bot_token: Union[str, None] = os.getenv("BOT_TOKEN")
+bot_token: str = os.getenv("BOT_TOKEN")
 bot = Bot(token=bot_token)
 
 
