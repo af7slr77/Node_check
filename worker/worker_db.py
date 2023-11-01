@@ -17,7 +17,7 @@ from config.zilliqa import PAUSE_BETWEEN_REQUESTS
 from block_worker.blocks_db import BlocksWorker
 from logs.logs import init_worker_logger
 import logging
-from typing import List, Union
+from typing import List, Union, Dict
 
 init_worker_logger('worker')
 worker_logger = logging.getLogger('worker.worker_db')
@@ -203,10 +203,10 @@ class Worker():
 					session.add(node)
 					await session.commit()
 			except Exception as ex:
-				worker_logger.warning(msg=ex, extra={'line': 191})
+				worker_logger.warning(msg=ex, extra={'line': 206})
 
 
-	async def _create_new_node(self, node_args):
+	async def _create_new_node(self, node_args: Dict[str, str]) -> Node:
 		new_node = Node(
 			node_url=node_args['node_url'],
 			node_name=node_args['node_name'],
