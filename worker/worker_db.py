@@ -97,11 +97,11 @@ class Worker():
 
 	async def _checking_the_operation_of_node(
 		self, 
-		node, 
-		missed_blocks
-	):
+		node: Node, 
+		missed_blocks: int
+	) -> None:
 		nodes_users = node.nodes_users
-		node_name = node.node_name
+		node_name = str(node.node_name)
 		try:
 			if missed_blocks is not None:
 				
@@ -127,7 +127,7 @@ class Worker():
 		except Exception as ex:
 			worker_logger.debug(ex, extra={'line':123})
 
-	async def _buttons(self):
+	async def _buttons(self) -> List[Node]:
 		async with self._async_session() as session:
 			result = await session.execute(select(Node))
 			buttons = result.all()
