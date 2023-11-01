@@ -226,12 +226,16 @@ class Worker():
 		)
 		return new_record
 
-	async def _get_missed_blocks(self, current_mini_epoch):
+	async def _get_missed_blocks(
+		self, 
+		current_mini_epoch: int| None
+		) -> Union[int, None]:
 		max_mini_epoch = await self._get_max_current_mini_epoch()
-		if current_mini_epoch is None:
+		if current_mini_epoch is not None and max_mini_epoch is not None:
+			missed_blocks_count = max_mini_epoch - current_mini_epoch
+			return missed_blocks_count
+		else:
 			return None
-		missed_blocks_count = max_mini_epoch - current_mini_epoch
-		return missed_blocks_count
 
 	async def is_negative(self, missed_blocks):
 		if missed_blocks is not None and missed_blocks < 0:
