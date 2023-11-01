@@ -165,7 +165,7 @@ class Worker():
 			else:
 				return user[0]
 
-	async def _get_nodes_users(self, node_name, ):
+	async def _get_nodes_users(self, node_name: str) -> List[User]|List:
 		async with self._async_session() as session:
 			stmt = select(Node).options(
 				joinedload(Node.nodes_users)
