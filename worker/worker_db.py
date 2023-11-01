@@ -237,7 +237,7 @@ class Worker():
 		else:
 			return None
 
-	async def is_negative(self, missed_blocks):
+	async def is_negative(self, missed_blocks: int|None) -> int|None:
 		if missed_blocks is not None and missed_blocks < 0:
 			return 0
 		return missed_blocks
