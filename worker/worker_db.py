@@ -39,19 +39,21 @@ class Worker():
 		async with self._async_session() as session:
 			node = await self._get_one_node_from_db(node_name)
 			user = await self._get_one_user_from_db(tg_user_id)
-			stmt = select(NodesUsers).where(
-				NodesUsers.node_id==node.node_id, 
-				NodesUsers.user_id == user.user_id
-			)
-			responce = await session.execute(stmt)
-			nodes_user = responce.unique().one_or_none()
-			if nodes_user is not None:
-				await session.delete(nodes_user[0])
-				await session.commit()
-				return True
-			else:
-				return False
-
+			if node is not None and user is not None:
+				stmt = select(NodesUsers).where(
+					NodesUsers.node_id == node.node_id, 
+					NodesUsers.user_id == user.user_id
+				)
+				responce = await session.execute(stmt)
+				nodes_user = responce.unique().one_or_none()
+				if nodes_user is not None:
+					await session.delete(nodes_user[0])
+					await session.commit()
+					return True
+				else:
+					return False
+			return False
+			
 	async def _get_max_curent_ds_epoch(self) -> int:
 		async with self._async_session() as session:
 			stmt = select(func.max(Records.current_ds_epoch))
@@ -133,15 +135,15 @@ class Worker():
 			buttons = result.all()
 		return buttons
 
-	async def _get_one_node_from_db(self, node_name):
+	async def _get_one_node_from_db(self, node_name: str) -> Node|None:
 		async with self._async_session() as session:
 			stmt = select(Node).filter_by(
 				node_name = node_name
 				).options(joinedload(Node.records))
 			result = await session.execute(stmt)
 			node = result.unique().one_or_none()
-			if node == None:
-				return node
+			if node is None:
+				return None
 			return node[0]
 
 	async def _get_all_nodes_from_db(self):
