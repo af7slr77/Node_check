@@ -155,16 +155,15 @@ class Worker():
 			all_nodes = result.unique().all()
 			return all_nodes
 	
-	async def _get_one_user_from_db(self, tg_user_id):
+	async def _get_one_user_from_db(self, tg_user_id: int) -> Node|None:
 		async with self._async_session() as session:
 			stmt = select(User).filter_by(user_telegram_id = tg_user_id)
 			result = await session.execute(stmt)
 			user = result.unique().one_or_none()
-			if user == None:
-				return user
+			if user is None:
+				return None
 			else:
 				return user[0]
-			return user
 
 	async def _get_nodes_users(self, node_name, ):
 		async with self._async_session() as session:
