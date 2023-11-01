@@ -53,7 +53,7 @@ class Worker():
 				else:
 					return False
 			return False
-			
+
 	async def _get_max_curent_ds_epoch(self) -> int:
 		async with self._async_session() as session:
 			stmt = select(func.max(Records.current_ds_epoch))
@@ -146,7 +146,7 @@ class Worker():
 				return None
 			return node[0]
 
-	async def _get_all_nodes_from_db(self):
+	async def _get_all_nodes_from_db(self) -> List[Node]:
 		async with self._async_session() as session:
 			stmt = select(Node).options(
 				joinedload(Node.records)
